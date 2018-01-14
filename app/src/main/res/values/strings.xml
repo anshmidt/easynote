@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">EasyNote</string>
+    <string name="search_title">Search</string>
+    <string name="add_button_title">Add</string>
+    <string name="open_trash_title">Open Trash</string>
+    <string name="settings_title">Settings</string>
+
+</resources>
