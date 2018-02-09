@@ -15,7 +15,7 @@ public class Note {
     private String listName;
     private long modificationTime;  //ms
 
-    public final int DEFAULT_PRIORITY_ID = 1;  //normal
+    public final int DEFAULT_PRIORITY_ID = 2;  //normal
     private final String LOG_TAG = Note.class.getSimpleName();
 
     public Note() {
