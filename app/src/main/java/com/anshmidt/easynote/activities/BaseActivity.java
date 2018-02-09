@@ -6,7 +6,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +23,7 @@ import com.anshmidt.easynote.R;
 import java.lang.reflect.Field;
 
 /**
- * Created by Sigurd Sigurdsson on 04.09.2017.
+ * Created by Ilya Anshmidt on 04.09.2017.
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
@@ -35,6 +34,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     SearchView searchView;
     ImageView clearSearchButton;
     EditText searchField;
+    String searchRequest;
+    private final String LOG_TAG = BaseActivity.class.getSimpleName();
 
 
     @Override
@@ -69,14 +70,16 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main,menu);
-        
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         expandSearchViewToWholeBar(searchView, menu);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String searchRequest) {
                 adapter.filter(searchRequest);
+                setSearchRequest(searchRequest);
                 return false;
             }
 
@@ -85,6 +88,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 if (! searchRequest.equals("")) {
                     adapter.filter(searchRequest);
                 }
+                setSearchRequest(searchRequest);
                 return false;
             }
         });
@@ -98,6 +102,11 @@ public abstract class BaseActivity extends AppCompatActivity {
                 searchField.setText("");
             }
         });
+
+        if (searchRequest != null) {
+            Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + searchRequest);
+            adapter.filter(searchRequest);
+        }
 
         return true;
     }
@@ -148,26 +157,30 @@ public abstract class BaseActivity extends AppCompatActivity {
                 break;
             }
             case R.id.action_open_trash: {
-                Toast.makeText(BaseActivity.this, getString(R.string.open_trash_title), Toast.LENGTH_LONG).show();
+                Toast.makeText(BaseActivity.this, getString(R.string.menu_open_trash_title), Toast.LENGTH_LONG).show();
                 break;
             }
             case R.id.action_recreate_db: {  //for debug purposes only
-                databaseHelper.clearAllNotes();
                 databaseHelper.fillDatabaseWithTestData();
                 recreate();
                 break;
             }
+            case R.id.action_perform_sql_request: {  //for debug purposes only
+                databaseHelper.performSqlRequest();
+                recreate();
+                break;
+            }
             case R.id.action_settings: {
-                Toast.makeText(BaseActivity.this, getString(R.string.settings_title), Toast.LENGTH_LONG).show();
+                Toast.makeText(BaseActivity.this, getString(R.string.menu_settings_title), Toast.LENGTH_LONG).show();
                 break;
             }
             case android.R.id.home: {  // "Up" button is clicked
                 int selectedItem = adapter.getSelectedItemPosition();
                 Note selectedNote = adapter.getItem(selectedItem);
                 Log.d("TAG", "Id of selectedNote item in database: id = "+selectedNote.getId());
-                selectedNote.printContent();
+                selectedNote.printContentToLog();
                 //Note tempSelectedNoteData = adapter.notesList.get(selectedItem);
-                databaseHelper.updateNote(selectedNote);
+//                databaseHelper.updateNote(selectedNote);
                 break;
             }
         }
@@ -180,7 +193,15 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void openEditNoteActivity(final int itemPosition) {
         Intent intent = new Intent(this, EditNoteActivity.class);
         intent.putExtra("itemPosition", itemPosition);
+        if (searchRequest != null) {
+            intent.putExtra("searchRequest", searchRequest);
+        }
         startActivity(intent);
+    }
+
+
+    public void setSearchRequest(String request) {
+        this.searchRequest = request;
     }
 
     protected NotesListAdapter getNotesListAdapter() {
@@ -191,22 +212,5 @@ public abstract class BaseActivity extends AppCompatActivity {
         this.adapter = adapter;
     }
 
-//    private ItemTouchHelper initItemTouchHelper() {
-//        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-//            @Override
-//            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-//                return false;
-//            }
-//
-//            @Override
-//            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
-//                final int position = viewHolder.getAdapterPosition();
-//                getNotesListAdapter().remove(position);
-//                Toast.makeText(BaseActivity.this, "Item with position = "+position+" deleted", Toast.LENGTH_SHORT).show();
-//                Log.i("TAG","Item with position = "+position+" deleted");
-//            }
-//        };
-//        return new ItemTouchHelper(simpleItemTouchCallback);
-//    }
 
 }

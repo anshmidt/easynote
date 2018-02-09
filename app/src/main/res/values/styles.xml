@@ -1,17 +1,16 @@
 <resources>
 
     <!-- Base application theme. -->
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/primary</item>
+        <item name="autoCompleteTextViewStyle">@style/cursorInSearchViewColor</item>
     </style>
 
-    <!--For cursor in SearchView-->
-    <style name="cursorColor" parent="Widget.AppCompat.AutoCompleteTextView">
-        <item name="android:textCursorDrawable">@drawable/cursor</item>
+    <!--For cursor_searchview in SearchView-->
+    <style name="cursorInSearchViewColor" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:textCursorDrawable">@drawable/cursor_searchview</item>
     </style>
 
 </resources>

@@ -1,7 +1,7 @@
 package com.anshmidt.easynote;
 
 /**
- * Created by Sigurd Sigurdsson on 02.09.2017.
+ * Created by Ilya Anshmidt on 02.09.2017.
  */
 
 import android.content.Context;
@@ -28,6 +28,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     private List<Note> notesList;
     private List<Note> searchResultsList = new ArrayList<>();  //for search results
     private int selectedItem = -1;
+    private final String LOG_TAG = NotesListAdapter.class.getSimpleName();
 
     // stores and recycles views as they are scrolled off screen
     public class NoteViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnFocusChangeListener {
@@ -50,14 +51,14 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                     @Override
                     public void onTextChanged(CharSequence s, int start, int before, int count) {
                         // it's also happens when activity starts
-                        //check if text has actually changed
+                        //I have to check if text has actually changed
                         String newText = s.toString();
                         if (editNoteText.hasFocus()) {
                             Note selectedNote = notesList.get(selectedItem);
                             selectedNote.setText(newText);
+                            notesList.get(selectedItem).setText(newText);
                             databaseHelper.updateNote(selectedNote);
                         }
-
                     }
 
                     @Override
@@ -79,11 +80,12 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
             if (context instanceof EditNoteActivity) {
                 if (hasFocus) {
                     selectedItem = getAdapterPosition();
-                    Log.i("TAG", "You clicked number " + selectedItem);
-                } else {  //switching from current item to next
-                    String text = ((EditText) v).getText().toString();
-                    notesList.get(selectedItem).setText(text);
+                    Log.i(LOG_TAG, "onFocusChange: selected item: position: " + selectedItem + ", id in database: " + getItemDbId(selectedItem));
                 }
+//                else {  //switching from current item to next
+//                    String text = ((EditText) v).getText().toString();
+//                    notesList.get(selectedItem).setText(text);
+//                }
             }
         }
     }
@@ -119,7 +121,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         if (selectedItem == i) {
             if (context instanceof EditNoteActivity) {
                 noteViewHolder.editNoteText.requestFocus();
-                noteViewHolder.editNoteText.setSelection(noteViewHolder.editNoteText.getText().length()); //move cursor to the end of the note
+                noteViewHolder.editNoteText.setSelection(noteViewHolder.editNoteText.getText().length()); //move cursor_searchview to the end of the note
             }
         }
     }
@@ -129,13 +131,14 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         if (notesList != null) {
             return notesList.size();
         } else {
-            Log.i("TAG","getItemCount(): notesList is null");
+            Log.i(LOG_TAG,"getItemCount(): notesList is null");
             return 0;
         }
     }
 
+
     public void onItemClick(View view, int position) {
-        Log.i("TAG", "You clicked number " + position);
+        Log.i(LOG_TAG, "onItemClick: You clicked item with position: " + position + ", id in database: " + getItemDbId(position));
         if (context instanceof MainActivity){
             ((MainActivity) context).openEditNoteActivity(position);
         }
@@ -161,6 +164,13 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 
     public int getSelectedItemPosition() {
         return selectedItem;
+    }
+
+    public int getItemDbId(int positionInList) {
+        Note note = getItem(positionInList);
+        int itemDbId = note.getId();
+        note.printContentToLog();
+        return itemDbId;
     }
 
     public void filter(String searchRequest) {

@@ -3,6 +3,7 @@ package com.anshmidt.easynote.activities;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.anshmidt.easynote.DatabaseHelper;
@@ -14,7 +15,7 @@ import com.anshmidt.easynote.SimpleDividerItemDecoration;
 import java.util.List;
 
 /**
- * Created by Sigurd Sigurdsson on 02.09.2017.
+ * Created by Ilya Anshmidt on 02.09.2017.
  */
 
 public class EditNoteActivity extends BaseActivity {
@@ -25,6 +26,7 @@ public class EditNoteActivity extends BaseActivity {
     private LinearLayoutManager llm;
     public int positionInList;
     private DatabaseHelper databaseHelper;
+    private final String LOG_TAG = EditNoteActivity.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +48,11 @@ public class EditNoteActivity extends BaseActivity {
         rv.setAdapter(adapter);
 
         positionInList = getIntent().getIntExtra("itemPosition", 0);
+
+        searchRequest = getIntent().getStringExtra("searchRequest"); //or null if it's not in intent
+        if (searchRequest != null) {
+            Log.d(LOG_TAG, "searchRequest " + searchRequest + " was found in the intent");
+        }
 
         llm.setStackFromEnd(true);  //to fix issue with 3 last items covered with a keyboard
     }

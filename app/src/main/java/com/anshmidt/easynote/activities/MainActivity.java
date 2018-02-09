@@ -25,7 +25,7 @@ public class MainActivity extends BaseActivity {
     protected RecyclerView rv;
     protected NotesListAdapter adapter;
     DatabaseHelper databaseHelper;
-
+    private final String LOG_TAG = MainActivity.class.getSimpleName();
 
 
     @Override
@@ -44,7 +44,12 @@ public class MainActivity extends BaseActivity {
         rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
 
-        //notesList = getNotesList();
+        // temp
+
+        // end of temp
+
+
+
         adapter = new NotesListAdapter(notesList, this);
         setNotesListAdapter(adapter);
         rv.setAdapter(adapter);
