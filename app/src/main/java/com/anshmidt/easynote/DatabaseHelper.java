@@ -42,10 +42,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private final String LOG_TAG = DatabaseHelper.class.getSimpleName();
     private static DatabaseHelper databaseHelperInstance;
+    private Context context;
 
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        //this.context = context;
+        this.context = context;
     }
 
     public static DatabaseHelper getInstance(Context context){
@@ -146,13 +147,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return listId;
     }
 
-    private void addPriority(String priorityName) {
+//    private void addPriority(String priorityName) {
+//        SQLiteDatabase db = this.getWritableDatabase();
+//        ContentValues values = new ContentValues();
+//        values.put(KEY_PRIORITY_NAME, priorityName);
+//        db.insert(PRIORITY_TABLE_NAME, null, values);
+//        db.close();
+//        Log.d(LOG_TAG, "Priority inserted: " + priorityName);
+//    }
+
+    private void addPriority(Priority priority) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(KEY_PRIORITY_NAME, priorityName);
+        values.put(KEY_PRIORITY_NAME, priority.name);
         db.insert(PRIORITY_TABLE_NAME, null, values);
         db.close();
-        Log.d(LOG_TAG, "Priority inserted: " + priorityName);
+        Log.d(LOG_TAG, "Priority inserted: " + priority.name);
     }
 
     private void addList(String listName) {
@@ -181,9 +191,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void addNote(Note note) {
         long modificationTimestamp = note.getModificationTime();
         String text = note.getText();
-        int priorityId = note.getPriorityId();
+        int priorityId = note.priority.id;
         if (priorityId == 0) {  //if not initialized
-            priorityId = getPriorityIdByName(note.getPriorityName());
+            priorityId = getPriorityIdByName(note.priority.name);
         }
         int listId = note.getListId();
         if (listId == 0) {
@@ -197,17 +207,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         addNote(1310000000000L, "First note", 2, 1);
         addNote(1320000000000L, "Second note", 2, 1);
         addNote(1330000000000L, "Third note", 2, 1);
+        addNote(1340000000000L, "Fourth minor note", 3, 1);
+        addNote(1350000000000L, "Fifth important note", 1, 1);
+        addNote(1360000000000L, "Sixth note", 2, 1);
+        addNote(1380000000000L, "7 note", 2, 1);
+        addNote(1390000000000L, "8 note", 2, 1);
+        addNote(1400000000000L, "9 note", 2, 1);
+        addNote(1410000000000L, "10 no\nte", 2, 1);
+        addNote(1420000000000L, "11 no\nte", 2, 1);
+        addNote(1430000000000L, "12 note", 2, 1);
+        addNote(1440000000000L, "13 no\nte", 2, 1);
+        addNote(1450000000000L, "14 no\nte", 2, 1);
+        addNote(1460000000000L, "15 note", 2, 1);
+        addNote(1470000000000L, "16 note", 2, 1);
+        addNote(1480000000000L, "17 note", 2, 1);
+        addNote(1490000000018L, "18 note", 2, 1);
+        addNote(1490000000019L, "19 note", 2, 1);
+        addNote(1490000000020L, "20 note", 2, 1);
+        addNote(1490000000021L, "21 note", 2, 1);
+        addNote(1490000000022L, "22 note", 2, 1);
+        addNote(1490000000023L, "23 note", 2, 1);
+        addNote(1490000000024L, "24 (list2) note", 2, 2);
+        addNote(1490000000025L, "25 (list2) note", 2, 2);
+        addNote(1490000000026L, "26 (list2) note", 2, 2);
+        addNote(1490000000027L, "27 note", 2, 1);
+        addNote(1490000000028L, "28 note", 2, 1);
+        addNote(1490000000029L, "29 note", 2, 1);
+        addNote(1490000000030L, "30 note", 2, 1);
     }
 
     private void fillPriorityTableWithTestData() {
-        addPriority("Important");
-        addPriority("Normal");
-        addPriority("Minor");
-        addPriority("Trash");
+        PriorityInfo priorityInfo = new PriorityInfo(context);
+        addPriority(priorityInfo.IMPORTANT);
+        addPriority(priorityInfo.NORMAL);
+        addPriority(priorityInfo.MINOR);
+        addPriority(priorityInfo.TRASH);
     }
 
     private void fillListsTableWithTestData() {
-        addList("All notes");
+        addList("Notes");
+        addList("List 2");
     }
 
     public void fillDatabaseWithTestData() {
@@ -255,8 +294,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public List<Note> getAllNotes() {
-        List<Note> notesList = new ArrayList<>();
+    public ArrayList<Note> getAllNotes() {
+        ArrayList<Note> notesList = new ArrayList<>();
         String selectAllNotesQuery = "SELECT "
                 + KEY_NOTE_ID + ", "
                 + KEY_MODIFIED_AT + ", "
@@ -274,7 +313,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " ASC, "
                 + KEY_MODIFIED_AT + " DESC";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectAllNotesQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -283,11 +322,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 note.setId(Integer.parseInt(cursor.getString(0)));
                 note.setModificationTime(cursor.getLong(1));
                 note.setText(cursor.getString(2));
-                note.setPriorityId(cursor.getInt(3));
-                note.setPriorityName(cursor.getString(4));
+
+                int priorityId = cursor.getInt(3);
+                String priorityName = cursor.getString(4);
+                note.priority = new Priority(priorityId, priorityName);
+                //note.setPriority(new Priority(priorityId, priorityName));
+
                 note.setListId(cursor.getInt(5));
                 note.setListName(cursor.getString(6));
                 notesList.add(note);
+                Log.d(LOG_TAG, "getAllNotes(): note: ");
+                note.printContentToLog();
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -309,18 +354,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         logSelectResult(selectAllNotesQuery);
     }
 
-
     public void deleteNote(Note note) {
         int noteId = note.getId();
-        Log.d(LOG_TAG,"Start deleting note from database:");
-        note.printContentToLog();
-
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(NOTES_TABLE_NAME, KEY_NOTE_ID + " = ?",
                 new String[] { String.valueOf(noteId) });
         Log.d(LOG_TAG,"note was deleted from database:");
         note.printContentToLog();
-
         db.close();
     }
 
@@ -333,9 +373,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(KEY_MODIFIED_AT, note.getModificationTime());
         values.put(KEY_TEXT, note.getText());
 
-        int priorityId = note.getPriorityId();
+        int priorityId = note.priority.id;
         if (priorityId == 0) {  //if not initialized
-            priorityId = getPriorityIdByName(note.getPriorityName());
+            priorityId = getPriorityIdByName(note.priority.name);
         }
         values.put(KEY_PRIORITY_ID, priorityId);
 
@@ -352,6 +392,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result;
     }
 
+    public int getEmptyNotesCount() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(" + KEY_NOTE_ID + ") FROM " + NOTES_TABLE_NAME + " WHERE " + KEY_TEXT + " = ''";
+        Cursor cursor = db.rawQuery(query, null);
+        int emptyNotesCount = -1;
+        if (cursor.moveToFirst()) {
+            emptyNotesCount = cursor.getInt(0);
+        }
+        cursor.close();
+        db.close();
+        Log.d(LOG_TAG, "Empty notes count: " + emptyNotesCount);
+        return emptyNotesCount;
+    }
+
+    public void deleteEmptyNotes() {
+        getEmptyNotesCount();
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "DELETE FROM " + NOTES_TABLE_NAME + " WHERE trim(" + KEY_TEXT + ")=''";
+        db.execSQL(query);
+        db.close();
+        getEmptyNotesCount();
+    }
 
 
 
@@ -359,17 +421,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
 
-
-
-
-
-//
-//    public void clearAllNotes() {
-//        SQLiteDatabase db = this.getWritableDatabase();
-//        db.delete(TABLE_NOTES_NAME, null, null);
-//        db.close();
-//    }
-//
 
 
 }

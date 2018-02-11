@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
 
 import com.anshmidt.easynote.DatabaseHelper;
 import com.anshmidt.easynote.Note;
@@ -12,6 +11,7 @@ import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 import com.anshmidt.easynote.SimpleDividerItemDecoration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,10 +20,10 @@ import java.util.List;
 
 public class EditNoteActivity extends BaseActivity {
 
-    protected List<Note> notesList;
+    protected ArrayList<Note> notesList;
     protected RecyclerView rv;
-    protected  NotesListAdapter adapter;
-    private LinearLayoutManager llm;
+    protected NotesListAdapter adapter;
+
     public int positionInList;
     private DatabaseHelper databaseHelper;
     private final String LOG_TAG = EditNoteActivity.class.getSimpleName();
@@ -34,14 +34,12 @@ public class EditNoteActivity extends BaseActivity {
         setContentView(R.layout.activity_editnote);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        //notesList = getNotesList();
         databaseHelper = DatabaseHelper.getInstance(EditNoteActivity.this);
         rv = (RecyclerView) findViewById(R.id.recyclerView);
         llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
         rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
-        //notesList = NoteDataHolder.getInstance().getNotesList();
         notesList = databaseHelper.getAllNotes();
         adapter = new NotesListAdapter(notesList, this);
         setNotesListAdapter(adapter);
@@ -62,7 +60,7 @@ public class EditNoteActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        adapter.setSelectedItem(positionInList);
+        adapter.setSelectedNotePosition(positionInList);
         //llm.scrollToPositionWithOffset(positionInList, 0);   //also works, but a bit different
         llm.scrollToPosition(positionInList);
 

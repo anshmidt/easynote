@@ -13,4 +13,19 @@
         <item name="android:textCursorDrawable">@drawable/cursor_searchview</item>
     </style>
 
+    <style name="importantNote">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/notesTextColor</item>
+    </style>
+
+    <style name="normalNote">
+        <item name="android:textStyle">normal</item>
+        <item name="android:textColor">@color/notesTextColor</item>
+    </style>
+
+    <style name="minorNote">
+        <item name="android:textStyle">italic</item>
+        <item name="android:textColor">@color/minorNotesTextColor</item>
+    </style>
+
 </resources>

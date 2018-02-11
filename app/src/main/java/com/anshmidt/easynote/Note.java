@@ -1,5 +1,6 @@
 package com.anshmidt.easynote;
 
+import android.content.Context;
 import android.util.Log;
 
 /**
@@ -9,26 +10,29 @@ import android.util.Log;
 public class Note {
     private int id;
     private String text;
-    private int priorityId;
-    private String priorityName;  // important/normal/minor/trash
+    //private int priorityId;
+    //private String priorityName;  // IMPORTANT/NORMAL/MINOR/trash
+
+    public Priority priority;
     private int listId;
     private String listName;
     private long modificationTime;  //ms
 
-    public final int DEFAULT_PRIORITY_ID = 2;  //normal
+    //public final int DEFAULT_PRIORITY_ID = 2;  //NORMAL
     private final String LOG_TAG = Note.class.getSimpleName();
 
     public Note() {
     }
 
-    public Note(String text) {
+    public Note(String text, Context context) {
         this.text = text;
-        this.priorityId = DEFAULT_PRIORITY_ID;
+        PriorityInfo priorityInfo = new PriorityInfo(context);
+        this.priority = priorityInfo.DEFAULT;
         this.modificationTime = System.currentTimeMillis();
     }
 
     public void printContentToLog() {
-        Log.d(LOG_TAG, "id = '" + getId() + "', priorityId = '" + getPriorityId() +
+        Log.d(LOG_TAG, "id = '" + getId() + "', priority = '" + priority.name +
                 "', modificationTime = '" + getModificationTime() +
                 "', text = '" + getText() + "'");
     }
@@ -49,13 +53,13 @@ public class Note {
         this.text = text;
     }
 
-    public int getPriorityId() {
-        return priorityId;
-    }
+//    public int getPriorityId() {
+//        return priorityId;
+//    }
 
-    public void setPriorityId(int priorityId) {
-        this.priorityId = priorityId;
-    }
+//    public void setPriorityId(int priorityId) {
+//        this.priorityId = priorityId;
+//    }
 
     public long getModificationTime() {
         return modificationTime;
@@ -65,13 +69,13 @@ public class Note {
         this.modificationTime = modificationTime;
     }
 
-    public String getPriorityName() {
-        return priorityName;
-    }
-
-    public void setPriorityName(String priorityName) {
-        this.priorityName = priorityName;
-    }
+//    public String getPriorityName() {
+//        return priorityName;
+//    }
+//
+//    public void setPriorityName(String priorityName) {
+//        this.priorityName = priorityName;
+//    }
 
     public int getListId() {
         return listId;
@@ -89,6 +93,11 @@ public class Note {
         this.listName = listName;
     }
 
-
-
+//    public Priority getPriority() {
+//        return priority;
+//    }
+//
+//    public void setPriority(Priority priority) {
+//        this.priority = priority;
+//    }
 }

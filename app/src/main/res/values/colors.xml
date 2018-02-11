@@ -8,4 +8,6 @@
     <color name="menuIcons">#ffffffff</color>
     <color name="cursorColorInSearch">#eeeeee</color>
     <color name="notesDividerColor">#ececec</color>
+    <color name="minorNotesTextColor">#bbbbbb</color>
+    <color name="importantNotesLabelColor">#D00101</color>
 </resources>

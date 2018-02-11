@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.util.Log;
@@ -28,7 +29,8 @@ import java.lang.reflect.Field;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    private RecyclerView rv;
+    protected RecyclerView rv;
+    protected LinearLayoutManager llm;
     private NotesListAdapter adapter;
     private DatabaseHelper databaseHelper;
     SearchView searchView;
@@ -38,6 +40,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
 
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,11 +49,8 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         //temp
         databaseHelper.printAll();
-        //databaseHelper.clearAllNotes();
-        //databaseHelper.fillDatabaseWithTestData();
         //end of temp
 
-        //NoteDataHolder.getInstance().setNotesList(databaseHelper.getAllNotes());
     }
 
 
@@ -144,15 +145,20 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_add: {
-                if (this instanceof MainActivity) {
-                    openEditNoteActivity(0);
+                if (databaseHelper.getEmptyNotesCount() > 0) {
+                    return super.onOptionsItemSelected(item);
                 }
-                Note newNote = new Note("");
 
-                getNotesListAdapter().add(0, newNote);
+                int newNotePosition = getNotesListAdapter().whereToAddNewNote();
+                if (this instanceof MainActivity) {
+                    openEditNoteActivity(newNotePosition);
+                }
+                Note newNote = new Note("", getBaseContext());
+
+                adapter.add(newNotePosition, newNote);
                 rv = (RecyclerView)findViewById(R.id.recyclerView);
-                rv.getLayoutManager().scrollToPosition(0);
-                getNotesListAdapter().setSelectedItem(0);
+                rv.getLayoutManager().scrollToPosition(newNotePosition);
+                adapter.setSelectedNotePosition(newNotePosition);
                 databaseHelper.addNote(newNote);
                 break;
             }
@@ -174,13 +180,8 @@ public abstract class BaseActivity extends AppCompatActivity {
                 Toast.makeText(BaseActivity.this, getString(R.string.menu_settings_title), Toast.LENGTH_LONG).show();
                 break;
             }
-            case android.R.id.home: {  // "Up" button is clicked
-                int selectedItem = adapter.getSelectedItemPosition();
-                Note selectedNote = adapter.getItem(selectedItem);
-                Log.d("TAG", "Id of selectedNote item in database: id = "+selectedNote.getId());
-                selectedNote.printContentToLog();
-                //Note tempSelectedNoteData = adapter.notesList.get(selectedItem);
-//                databaseHelper.updateNote(selectedNote);
+            case android.R.id.home: {  // "Up" button
+                databaseHelper.deleteEmptyNotes();
                 break;
             }
         }
