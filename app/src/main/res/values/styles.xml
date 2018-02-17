@@ -1,17 +1,32 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!--<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!--<style name="AppTheme" parent="Theme.AppCompat">-->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
         <item name="colorAccent">@color/primary</item>
         <item name="autoCompleteTextViewStyle">@style/cursorInSearchViewColor</item>
     </style>
 
+    <style name="ToolbarTheme" parent="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        <item name="android:textColorPrimary">@color/menuIcons</item>
+    </style>
+
+
+
+
+
+
+
+
+
     <!--For cursor_searchview in SearchView-->
     <style name="cursorInSearchViewColor" parent="Widget.AppCompat.AutoCompleteTextView">
         <item name="android:textCursorDrawable">@drawable/cursor_searchview</item>
     </style>
+
 
     <style name="importantNote">
         <item name="android:textStyle">bold</item>

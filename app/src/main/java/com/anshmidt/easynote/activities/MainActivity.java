@@ -1,5 +1,6 @@
 package com.anshmidt.easynote.activities;
 
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +8,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.anshmidt.easynote.DatabaseHelper;
 import com.anshmidt.easynote.Note;
@@ -33,6 +35,11 @@ public class MainActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         forceUsingOverflowMenu();
         setContentView(R.layout.activity_main);
+//        getSupportActionBar().setDisplayShowTitleEnabled(false);
+//        getSupportActionBar().setTitle("");
+
+
+
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(this);
         notesList = databaseHelper.getAllNotes();

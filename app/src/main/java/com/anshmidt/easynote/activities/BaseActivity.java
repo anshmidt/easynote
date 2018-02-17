@@ -1,5 +1,7 @@
 package com.anshmidt.easynote.activities;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -7,21 +9,27 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.anshmidt.easynote.DatabaseHelper;
+import com.anshmidt.easynote.ListsSpinnerAdapter;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
@@ -37,6 +45,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     ImageView clearSearchButton;
     EditText searchField;
     String searchRequest;
+    Toolbar toolbar;
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
 
 
@@ -51,6 +60,10 @@ public abstract class BaseActivity extends AppCompatActivity {
         databaseHelper.printAll();
         //end of temp
 
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
 
@@ -108,6 +121,33 @@ public abstract class BaseActivity extends AppCompatActivity {
             Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + searchRequest);
             adapter.filter(searchRequest);
         }
+
+
+//        Spinner spinner = (Spinner) findViewById(R.id.list_spinner);
+//        List<String> list = new ArrayList<String>();
+//        list.add("My notes");
+//        list.add("To do");
+//        list.add("Some other things");
+//        list.add("+ Add New List");
+//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.list_spinner_item, list);
+//        dataAdapter.setDropDownViewResource(R.layout.list_spinner_dropdown_item);
+//        spinner.setAdapter(dataAdapter);
+
+        List<String> list = new ArrayList<String>();
+        list.add("My notes");
+        list.add("To do");
+        list.add("Some other things");
+//        list.add("+ Add New List");
+
+
+        Spinner spinner = (Spinner) findViewById(R.id.list_spinner);
+        ListsSpinnerAdapter listsSpinnerAdapter = new ListsSpinnerAdapter(this, R.layout.list_spinner_item, list);
+        listsSpinnerAdapter.setDropDownViewResource(R.layout.list_spinner_dropdown_item);
+        spinner.setAdapter(listsSpinnerAdapter);
+
+
+//        spinner.setOnItemSelectedListener(onItemSelectedListener);
+
 
         return true;
     }

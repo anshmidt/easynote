@@ -11,6 +11,7 @@
     <string name="menu_perform_sql_request">Perform SQL request</string>
     <string name="note_context_menu_change_priority_title">Make</string>
     <string name="new_note_hint">...</string>
+    <string name="add_new_list_label">+ Add New List</string>
 
     <string name="note_priority_important">Important</string>
     <string name="note_priority_normal">Normal</string>
