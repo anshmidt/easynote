@@ -5,14 +5,19 @@ import android.content.Context;
 import java.util.ArrayList;
 
 /**
- * Created by Sigurd Sigurdsson on 10.02.2018.
+ * Created by Ilya Anshmidt on 10.02.2018.
  */
 
 public class Priority {
     public String name;
     public int id;
+
     public Priority(int id, String name) {
         this.name = name;
+        this.id = id;
+    }
+
+    public Priority(int id) {
         this.id = id;
     }
 

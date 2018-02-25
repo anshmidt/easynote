@@ -1,7 +1,11 @@
 package com.anshmidt.easynote;
 
+import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Typeface;
+import android.os.Bundle;
+
 import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,21 +13,19 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Sigurd Sigurdsson on 17.02.2018.
+ * Created by Ilya Anshmidt on 17.02.2018.
  */
 
 public class ListsSpinnerAdapter extends ArrayAdapter<String> {
 
     private Context context;
     public List<String> arrayList;
-//    private ArrayAdapter<String> arrayAdapter;
-
-//    public static String ADD_NEW_LIST_LABEL = "+ Add New List";
     public static String ADD_NEW_LIST_LABEL;
 
     public ListsSpinnerAdapter(Context context, int textViewResourceId,
@@ -31,15 +33,10 @@ public class ListsSpinnerAdapter extends ArrayAdapter<String> {
         super(context, textViewResourceId, addCreateListItem(arrayList, context));
         this.context = context;
         this.arrayList = arrayList;
-//        arrayList.add(ADD_NEW_LIST_LABEL);
 
-//        arrayAdapter = new ArrayAdapter<String>(context, textViewResourceId, arrayList);
 
     }
 
-//    public ListsSpinnerAdapter(List<String> arrayList) {
-//        this(addCreateListItem(arrayList));
-//    }
 
     private static List<String> addCreateListItem(List<String> arrayList, Context context) {
         ADD_NEW_LIST_LABEL = context.getString(R.string.add_new_list_label);
@@ -48,15 +45,26 @@ public class ListsSpinnerAdapter extends ArrayAdapter<String> {
     }
 
     @Override
-    public View getDropDownView(int position, View convertView,
+    public View getDropDownView(int position, final View convertView,
                                 ViewGroup parent) {
-//        View view = arrayAdapter.getDropDownView(position, convertView, parent);
         View view = super.getDropDownView(position, convertView, parent);
         TextView textView = (TextView) view;
         if (arrayList.get(position).equals(ADD_NEW_LIST_LABEL)) {
             textView.setTypeface(null, Typeface.NORMAL);
             textView.setBackgroundColor(ContextCompat.getColor(context, R.color.primaryDark));
+            textView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+//                    Toast.makeText(context, "Add list clicked", Toast.LENGTH_LONG).show();
+                    RenameListDialogFragment dialog = new RenameListDialogFragment();
+//                    Bundle numberOfAlarmsBundle = new Bundle();
+//                    numberOfAlarmsBundle.putString("number_of_alarms", sharPrefHelper.getNumberOfAlarmsStr());
+//                    dialog.setArguments(numberOfAlarmsBundle);
+                    FragmentManager manager = ((Activity) context).getFragmentManager();
+                    dialog.show(manager, "renameListDialog");
 
+                }
+            });
         } else {
             textView.setBackgroundColor(ContextCompat.getColor(context, R.color.primary));
             textView.setTypeface(null, Typeface.BOLD);

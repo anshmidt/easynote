@@ -5,14 +5,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-import com.anshmidt.easynote.DatabaseHelper;
+import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 import com.anshmidt.easynote.SimpleDividerItemDecoration;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Ilya Anshmidt on 02.09.2017.

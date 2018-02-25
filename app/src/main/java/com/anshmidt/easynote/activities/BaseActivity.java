@@ -1,7 +1,5 @@
 package com.anshmidt.easynote.activities;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -15,21 +13,21 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.anshmidt.easynote.DatabaseHelper;
+import com.anshmidt.easynote.NotesList;
+import com.anshmidt.easynote.SharedPreferencesHelper;
+import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.ListsSpinnerAdapter;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
@@ -48,6 +46,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     Toolbar toolbar;
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
 
+    NotesList currentList;
+    SharedPreferencesHelper sharPrefHelper;
+
 
 
 
@@ -57,8 +58,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         databaseHelper = DatabaseHelper.getInstance(BaseActivity.this);
 
         //temp
-        databaseHelper.printAll();
+        databaseHelper.printAllNotes();
         //end of temp
+
+        sharPrefHelper = new SharedPreferencesHelper(BaseActivity.this);
+        int currentListId = sharPrefHelper.getLastOpenedListId();
+        currentList = new NotesList(currentListId);
 
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -123,33 +128,39 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
 
 
-//        Spinner spinner = (Spinner) findViewById(R.id.list_spinner);
-//        List<String> list = new ArrayList<String>();
-//        list.add("My notes");
-//        list.add("To do");
-//        list.add("Some other things");
-//        list.add("+ Add New List");
-//        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, R.layout.list_spinner_item, list);
-//        dataAdapter.setDropDownViewResource(R.layout.list_spinner_dropdown_item);
-//        spinner.setAdapter(dataAdapter);
-
-        List<String> list = new ArrayList<String>();
-        list.add("My notes");
-        list.add("To do");
-        list.add("Some other things");
-//        list.add("+ Add New List");
-
-
-        Spinner spinner = (Spinner) findViewById(R.id.list_spinner);
-        ListsSpinnerAdapter listsSpinnerAdapter = new ListsSpinnerAdapter(this, R.layout.list_spinner_item, list);
+        Spinner listNamesSpinner = (Spinner) findViewById(R.id.list_spinner);
+        ListsSpinnerAdapter listsSpinnerAdapter = new ListsSpinnerAdapter(
+                this,
+                R.layout.list_spinner_item,
+                databaseHelper.getAllListNames()
+        );
         listsSpinnerAdapter.setDropDownViewResource(R.layout.list_spinner_dropdown_item);
-        spinner.setAdapter(listsSpinnerAdapter);
+        listNamesSpinner.setAdapter(listsSpinnerAdapter);
 
 
-//        spinner.setOnItemSelectedListener(onItemSelectedListener);
+        listNamesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(LOG_TAG, "spinner item with position " + position + " selected");
+                NotesList selectedList = new NotesList(position);
+                currentList = selectedList;
+                sharPrefHelper.setLastOpenedList(currentList);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        setSpinnerPosition(listNamesSpinner, currentList.id);
 
 
         return true;
+    }
+
+    private void setSpinnerPosition(Spinner spinner, int position) {
+        spinner.setSelection(position);
     }
 
     protected void expandSearchViewToWholeBar(final SearchView searchView, final Menu menu) {
@@ -199,6 +210,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 rv = (RecyclerView)findViewById(R.id.recyclerView);
                 rv.getLayoutManager().scrollToPosition(newNotePosition);
                 adapter.setSelectedNotePosition(newNotePosition);
+                newNote.list = currentList;
                 databaseHelper.addNote(newNote);
                 break;
             }
@@ -207,7 +219,7 @@ public abstract class BaseActivity extends AppCompatActivity {
                 break;
             }
             case R.id.action_recreate_db: {  //for debug purposes only
-                databaseHelper.fillDatabaseWithTestData();
+                databaseHelper.fillDatabaseWithDefaultData();
                 recreate();
                 break;
             }

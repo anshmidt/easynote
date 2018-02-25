@@ -6,17 +6,24 @@
     <string name="menu_settings_title">Settings</string>
     <string name="menu_rename_list_title">Rename List</string>
     <string name="menu_delete_list_title">Delete This List</string>
-    <string name="main_add_new_list_title">Add New List</string>
     <string name="menu_restore_db">Restore DB</string>
     <string name="menu_perform_sql_request">Perform SQL request</string>
     <string name="note_context_menu_change_priority_title">Make</string>
     <string name="new_note_hint">...</string>
     <string name="add_new_list_label">+ Add New List</string>
+    <string name="rename_list_dialog_title">Enter list name:</string>
+
+    <string name="rename_list_dialog_ok_button">OK</string>
+    <string name="rename_list_dialog_cancel_button">Cancel</string>
 
     <string name="note_priority_important">Important</string>
     <string name="note_priority_normal">Normal</string>
     <string name="note_priority_minor">Minor</string>
     <string name="note_priority_trash">Trash</string>
+
+    <string name="default_first_list_name">My notes</string>
+
+    <string name="shar_pref_key_last_opened_list">last_opened_list</string>
 
 
 </resources>

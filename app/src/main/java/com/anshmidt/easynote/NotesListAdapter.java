@@ -5,7 +5,6 @@ package com.anshmidt.easynote;
  */
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -19,11 +18,11 @@ import android.widget.TextView;
 
 import com.anshmidt.easynote.activities.EditNoteActivity;
 import com.anshmidt.easynote.activities.MainActivity;
+import com.anshmidt.easynote.database.DatabaseHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.NoteViewHolder> {
 
@@ -67,8 +66,9 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                         String newText = s.toString();
                         if (noteEditText.hasFocus()) {
                             Note selectedNote = notesList.get(selectedNotePosition);
-                            selectedNote.setText(newText);
-                            notesList.get(selectedNotePosition).setText(newText);
+                            selectedNote.text = newText;
+                            notesList.get(selectedNotePosition).text = newText;
+                            selectedNote.modificationTime = System.currentTimeMillis();
                             databaseHelper.updateNote(selectedNote);
                         }
                     }
@@ -160,7 +160,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
             noteView = noteViewHolder.noteEditText;
             //noteViewHolder.noteEditText.setText(notesList.get(i).getText());
         }
-        noteView.setText(notesList.get(i).getText());
+        noteView.setText(notesList.get(i).text);
 
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
@@ -169,9 +169,9 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 //            Log.d(LOG_TAG, "Displaying important priority for note: ");
 //            notesList.get(i).printContentToLog();
 //        }
-        if (notesList.get(i).getText().equals("12 note")) {
-            notesList.get(i).printContentToLog();
-        }
+//        if (notesList.get(i).text.equals("12 note")) {
+//            notesList.get(i).printContentToLog();
+//        }
 
 
         if (selectedNotePosition == i) {
@@ -227,7 +227,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 
     public int getNoteDbId(int positionInList) {
         Note note = getNote(positionInList);
-        int noteDbId = note.getId();
+        int noteDbId = note.id;
         note.printContentToLog();
         return noteDbId;
     }
@@ -243,7 +243,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         } else {
             searchRequest = searchRequest.toLowerCase();
             for (Note item: searchResultsList){
-                if (item.getText().toLowerCase().contains(searchRequest)){
+                if (item.text.toLowerCase().contains(searchRequest)){
                     notesList.add(item);
                 }
             }
@@ -258,7 +258,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     }
 
     public String getNoteText(int position) {
-        return notesList.get(position).getText();
+        return notesList.get(position).text;
     }
 
     public String getSelectedItemText() {
@@ -312,10 +312,11 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                     return priorityId1.compareTo(priorityId2);
                 }
 
-                Long modTime1 = note1.getModificationTime();
-                Long modTime2 = note2.getModificationTime();
+                Long modTime1 = note1.modificationTime;
+                Long modTime2 = note2.modificationTime;
 
-                return modTime1.compareTo(modTime2);
+//                return modTime1.compareTo(modTime2);
+                return modTime2.compareTo(modTime1);
             }});
     }
 

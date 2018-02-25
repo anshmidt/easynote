@@ -7,7 +7,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 /**
- * Created by Sigurd Sigurdsson on 10.02.2018.
+ * Created by Ilya Anshmidt on 10.02.2018.
  */
 
 public class NoteDecorator {
