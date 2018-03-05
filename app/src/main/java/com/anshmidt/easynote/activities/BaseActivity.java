@@ -1,5 +1,6 @@
 package com.anshmidt.easynote.activities;
 
+import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -13,41 +14,52 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
+import com.anshmidt.easynote.list_names_spinner.ListNamesSpinnerController;
 import com.anshmidt.easynote.NotesList;
+import com.anshmidt.easynote.dialogs.RenameListDialogFragment;
 import com.anshmidt.easynote.SharedPreferencesHelper;
 import com.anshmidt.easynote.database.DatabaseHelper;
-import com.anshmidt.easynote.ListsSpinnerAdapter;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
  */
 
-public abstract class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity
+        implements RenameListDialogFragment.RenameListDialogListener,
+        ListNamesSpinnerController.ListSelectedListener,
+        ConfirmationDialogFragment.ConfirmationDialogListener
+{
 
+    private final String LOG_TAG = BaseActivity.class.getSimpleName();
     protected RecyclerView rv;
     protected LinearLayoutManager llm;
-    private NotesListAdapter adapter;
+    private NotesListAdapter notesListAdapter;
     private DatabaseHelper databaseHelper;
     SearchView searchView;
     ImageView clearSearchButton;
     EditText searchField;
     String searchRequest;
     Toolbar toolbar;
-    private final String LOG_TAG = BaseActivity.class.getSimpleName();
+    Spinner listNamesSpinner;
+//    ListNamesSpinnerAdapter listNamesSpinnerAdapter;
+    ListNamesSpinnerController listNamesSpinnerController;
 
-    NotesList currentList;
+
+    //NotesList currentList;
     SharedPreferencesHelper sharPrefHelper;
+
 
 
 
@@ -62,13 +74,19 @@ public abstract class BaseActivity extends AppCompatActivity {
         //end of temp
 
         sharPrefHelper = new SharedPreferencesHelper(BaseActivity.this);
-        int currentListId = sharPrefHelper.getLastOpenedListId();
-        currentList = new NotesList(currentListId);
+//        int currentListId = sharPrefHelper.getLastOpenedListId();
+//        currentList = new NotesList(currentListId);
 
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        listNamesSpinner = (Spinner) findViewById(R.id.list_spinner);
+
+        listNamesSpinnerController = new ListNamesSpinnerController(listNamesSpinner, BaseActivity.this);
+        listNamesSpinnerController.init(databaseHelper.getAllListNames());
+        listNamesSpinnerController.setListSelectedListener(this);
     }
 
 
@@ -97,7 +115,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String searchRequest) {
-                adapter.filter(searchRequest);
+                notesListAdapter.filter(searchRequest);
                 setSearchRequest(searchRequest);
                 return false;
             }
@@ -105,7 +123,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextChange(String searchRequest) {
                 if (! searchRequest.equals("")) {
-                    adapter.filter(searchRequest);
+                    notesListAdapter.filter(searchRequest);
                 }
                 setSearchRequest(searchRequest);
                 return false;
@@ -116,7 +134,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         clearSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                adapter.resetFilter();
+                notesListAdapter.resetFilter();
                 searchField = (EditText) findViewById(R.id.search_src_text);
                 searchField.setText("");
             }
@@ -124,44 +142,21 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         if (searchRequest != null) {
             Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + searchRequest);
-            adapter.filter(searchRequest);
+            notesListAdapter.filter(searchRequest);
         }
-
-
-        Spinner listNamesSpinner = (Spinner) findViewById(R.id.list_spinner);
-        ListsSpinnerAdapter listsSpinnerAdapter = new ListsSpinnerAdapter(
-                this,
-                R.layout.list_spinner_item,
-                databaseHelper.getAllListNames()
-        );
-        listsSpinnerAdapter.setDropDownViewResource(R.layout.list_spinner_dropdown_item);
-        listNamesSpinner.setAdapter(listsSpinnerAdapter);
-
-
-        listNamesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(LOG_TAG, "spinner item with position " + position + " selected");
-                NotesList selectedList = new NotesList(position);
-                currentList = selectedList;
-                sharPrefHelper.setLastOpenedList(currentList);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        setSpinnerPosition(listNamesSpinner, currentList.id);
-
 
         return true;
     }
 
-    private void setSpinnerPosition(Spinner spinner, int position) {
-        spinner.setSelection(position);
+    @Override
+    public void onListSelected() {
+        NotesList currentList = listNamesSpinnerController.getCurrentList();
+        ArrayList<Note> notes = databaseHelper.getAllNotesFromList(currentList);
+        notesListAdapter.notesList = notes;
+        notesListAdapter.notifyDataSetChanged();
+
     }
+
 
     protected void expandSearchViewToWholeBar(final SearchView searchView, final Menu menu) {
         final MenuItem searchItem = menu.findItem(R.id.action_search);
@@ -170,7 +165,7 @@ public abstract class BaseActivity extends AppCompatActivity {
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 setItemsVisibility(menu, searchItem, true);
-                adapter.resetFilter();
+                notesListAdapter.resetFilter();
                 return true;
             }
             @Override
@@ -196,7 +191,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.action_add: {
-                if (databaseHelper.getEmptyNotesCount() > 0) {
+                if (databaseHelper.getEmptyNotesCountInList(listNamesSpinnerController.getCurrentList()) > 0) {
                     return super.onOptionsItemSelected(item);
                 }
 
@@ -206,34 +201,52 @@ public abstract class BaseActivity extends AppCompatActivity {
                 }
                 Note newNote = new Note("", getBaseContext());
 
-                adapter.add(newNotePosition, newNote);
+                notesListAdapter.add(newNotePosition, newNote);
                 rv = (RecyclerView)findViewById(R.id.recyclerView);
                 rv.getLayoutManager().scrollToPosition(newNotePosition);
-                adapter.setSelectedNotePosition(newNotePosition);
-                newNote.list = currentList;
+                notesListAdapter.setSelectedNotePosition(newNotePosition);
+                newNote.list = listNamesSpinnerController.getCurrentList();
                 databaseHelper.addNote(newNote);
                 break;
             }
+            case R.id.action_rename_list: {
+                RenameListDialogFragment renameListDialogFragment = new RenameListDialogFragment();
+                Bundle currentListBundle = new Bundle();
+                currentListBundle.putString(renameListDialogFragment.KEY_CURRENT_LIST_NAME, sharPrefHelper.getLastOpenedListName());
+                renameListDialogFragment.setArguments(currentListBundle);
+                FragmentManager manager = getFragmentManager();
+                renameListDialogFragment.show(manager, renameListDialogFragment.FRAGMENT_TAG);
+                break;
+            }
+            case R.id.action_delete_list: {
+                ConfirmationDialogFragment confirmationDialogFragment = new ConfirmationDialogFragment();
+                Bundle currentListBundle = new Bundle();
+                currentListBundle.putString(confirmationDialogFragment.KEY_CURRENT_LIST_NAME, sharPrefHelper.getLastOpenedListName());
+                confirmationDialogFragment.setArguments(currentListBundle);
+                FragmentManager manager = getFragmentManager();
+                confirmationDialogFragment.show(manager, confirmationDialogFragment.FRAGMENT_TAG);
+                break;
+            }
             case R.id.action_open_trash: {
-                Toast.makeText(BaseActivity.this, getString(R.string.menu_open_trash_title), Toast.LENGTH_LONG).show();
+                startActivity(new Intent(this, TrashActivity.class));
                 break;
             }
-            case R.id.action_recreate_db: {  //for debug purposes only
-                databaseHelper.fillDatabaseWithDefaultData();
-                recreate();
-                break;
-            }
-            case R.id.action_perform_sql_request: {  //for debug purposes only
-                databaseHelper.performSqlRequest();
-                recreate();
-                break;
-            }
+//            case R.id.action_recreate_db: {  //for debug purposes only
+//                databaseHelper.fillDatabaseWithDefaultData();
+//                recreate();
+//                break;
+//            }
+//            case R.id.action_perform_sql_request: {  //for debug purposes only
+//                databaseHelper.performSqlRequest();
+//                recreate();
+//                break;
+//            }
             case R.id.action_settings: {
                 Toast.makeText(BaseActivity.this, getString(R.string.menu_settings_title), Toast.LENGTH_LONG).show();
                 break;
             }
             case android.R.id.home: {  // "Up" button
-                databaseHelper.deleteEmptyNotes();
+                //databaseHelper.deleteEmptyNotesFromList(listNamesSpinnerController.getCurrentList());
                 break;
             }
         }
@@ -258,12 +271,34 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected NotesListAdapter getNotesListAdapter() {
-        return adapter;
+        return notesListAdapter;
     }
 
     protected void setNotesListAdapter(NotesListAdapter adapter) {
-        this.adapter = adapter;
+        this.notesListAdapter = adapter;
     }
 
+    @Override
+    public void onListRenamed(String listName) {
+        int currentListId = listNamesSpinnerController.getCurrentList().id;
+        NotesList renamedList = new NotesList(currentListId, listName);
+        listNamesSpinnerController.onListRenamed(renamedList);
+        databaseHelper.updateList(renamedList);
+    }
 
+    @Override
+    public void onListAdded(String listName) {
+        NotesList newList = new NotesList(listName);
+        listNamesSpinnerController.onListAdded(newList);
+        listNamesSpinnerController.setSpinnerPosition(listNamesSpinner, newList);
+        databaseHelper.addList(newList);
+    }
+
+    @Override
+    public void onListMovedToTrashConfirmed() {
+        NotesList list = listNamesSpinnerController.getCurrentList();
+        databaseHelper.moveListToTrash(list);
+        databaseHelper.moveAllNotesFromListToTrash(list);
+        listNamesSpinnerController.onListMovedToTrash(list);
+    }
 }

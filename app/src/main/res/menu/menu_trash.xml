@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".activities.MainActivity">
+
+    <item android:id="@+id/action_search"
+        android:title="@string/menu_search_title"
+        android:icon="@drawable/ic_action_search"
+        app:showAsAction="collapseActionView|always"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        android:layout_width="wrap_content" />
+
+    <item
+        android:id="@+id/action_empty_trash"
+        android:orderInCategory="100"
+        android:title="@string/menu_trash_delete_all_title"
+        app:showAsAction="never"/>
+
+
+</menu>

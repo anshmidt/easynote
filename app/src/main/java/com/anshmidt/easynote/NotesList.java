@@ -21,9 +21,20 @@ public class NotesList {
         this.inTrash = inTrash;
     }
 
+    public NotesList(String name) {
+        this.name = name;
+        this.inTrash = DEFAULT_IN_TRASH;
+    }
+
     public NotesList(int id, String name) {
         this.id = id;
         this.name = name;
         this.inTrash = DEFAULT_IN_TRASH;
+    }
+
+    public NotesList(int id, String name, boolean inTrash) {
+        this.id = id;
+        this.name = name;
+        this.inTrash = inTrash;
     }
 }

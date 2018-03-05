@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
@@ -24,6 +25,7 @@ public class MainActivity extends BaseActivity {
     protected NotesListAdapter adapter;
     DatabaseHelper databaseHelper;
     private final String LOG_TAG = MainActivity.class.getSimpleName();
+    private Toast movedToTrashToast = null;
 
 
     @Override
@@ -35,12 +37,13 @@ public class MainActivity extends BaseActivity {
 
 
 
+
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(this);
-        notesList = databaseHelper.getAllNotes();
+        databaseHelper.deleteAllEmptyNotes();
+        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList());
 
         rv = (RecyclerView)findViewById(R.id.recyclerView);
-//        LinearLayoutManager llm = new LinearLayoutManager(this);
         llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
         rv.addItemDecoration(new SimpleDividerItemDecoration(this));
@@ -60,11 +63,16 @@ public class MainActivity extends BaseActivity {
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
                 int position = viewHolder.getAdapterPosition();
                 Note noteToRemove = adapter.getNote(position);
-                Log.d("TAG","Text of deleted item: "+adapter.getNote(position).text);
 
                 adapter.remove(position);
+                databaseHelper.moveNoteToTrash(noteToRemove);
+                if (movedToTrashToast != null) {
+                    movedToTrashToast.cancel();
+                }
+                movedToTrashToast = Toast.makeText(MainActivity.this, getString(R.string.note_moved_to_trash_toast), Toast.LENGTH_SHORT);
+                movedToTrashToast.show();
 
-                databaseHelper.deleteNote(noteToRemove);
+//                databaseHelper.deleteNote(noteToRemove);
                 //DeleteNoteTask deleteNoteTask = new DeleteNoteTask(MainActivity.this);
                 //deleteNoteTask.execute(position);  //not position, but id!
                 //deleteNoteTask.execute(idOfDeletedNote);
@@ -85,13 +93,13 @@ public class MainActivity extends BaseActivity {
         Log.d(LOG_TAG, "Long pressed note before changing: ");
         longPressedNote.printContentToLog();
 
-        if (item.getItemId() == adapter.CONTEXT_MENU_ITEM_MAKE_IMPORTANT) {
+        if (item.getItemId() == adapter.MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID) {
             longPressedNote.priority = priorityInfo.IMPORTANT;
         }
-        if (item.getItemId() == adapter.CONTEXT_MENU_ITEM_MAKE_NORMAL) {
+        if (item.getItemId() == adapter.MAIN_CONTEXT_MENU_ITEM_MAKE_NORMAL_ID) {
             longPressedNote.priority = priorityInfo.NORMAL;
         }
-        if (item.getItemId() == adapter.CONTEXT_MENU_ITEM_MAKE_MINOR) {
+        if (item.getItemId() == adapter.MAIN_CONTEXT_MENU_ITEM_MAKE_MINOR_ID) {
             longPressedNote.priority = priorityInfo.MINOR;
         }
         
@@ -102,10 +110,11 @@ public class MainActivity extends BaseActivity {
 
         int newPosition = adapter.getPosition(longPressedNote);
         llm.scrollToPosition(newPosition);
-//        adapter.notifyDataSetChanged();
 
         return super.onContextItemSelected(item);
     }
+
+
 
 
 

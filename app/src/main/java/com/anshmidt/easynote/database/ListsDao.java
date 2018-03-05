@@ -2,6 +2,7 @@ package com.anshmidt.easynote.database;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.pm.LabeledIntent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
@@ -24,6 +25,9 @@ public class ListsDao implements TableHelper {
     public static final String KEY_LIST_NAME = "list_name";
     public static final String KEY_LIST_ID = NotesDao.KEY_LIST_ID;
     public static final String KEY_IN_TRASH = "in_trash";
+
+    public final int IN_TRASH_TRUE = 1;
+    public final int IN_TRASH_FALSE = 0;
 
     private SQLiteDatabase db;
 
@@ -93,21 +97,48 @@ public class ListsDao implements TableHelper {
         return listId;
     }
 
-//    public NotesList getList() {
-//
+//    public String getListNameById(int listId) {
+////        String selectListNameQuery = "SELECT " + KEY_LIST_NAME
+////                + " FROM " + LISTS_TABLE_NAME
+////                + " WHERE " + KEY_LIST_ID + " = " + listId;
+////        Cursor cursor = db.rawQuery(selectListNameQuery, null);
+////
+////        String listName = "";
+////        if (cursor.moveToFirst()) {
+////            listName = cursor.getString(cursor.getColumnIndex(KEY_LIST_NAME));
+////        }
+////
+////        cursor.close();
+////        return listName;
 //    }
 
-    public List<String> getAllListNames() {
+    public NotesList getListById(int id) {
+        String selectListQuery = "SELECT " + KEY_LIST_NAME + ", " + KEY_IN_TRASH
+                + " FROM " + LISTS_TABLE_NAME
+                + " WHERE " + KEY_LIST_ID + " = " + id;
+        Cursor cursor = db.rawQuery(selectListQuery, null);
+        NotesList list = null;
+        if (cursor.moveToFirst()) {
+            String listName = cursor.getString(cursor.getColumnIndex(KEY_LIST_NAME));
+            int listInTrash = cursor.getInt(cursor.getColumnIndex(KEY_IN_TRASH));
+            list = new NotesList(id, listName, listInTrash == IN_TRASH_TRUE);
+        }
+        cursor.close();
+        return list;
+    }
+
+
+
+    public List<String> getAllListNamesNotFromTrash() {
         ArrayList<String> listNamesList = new ArrayList<>();
-        String selectAllListNamesQuery = "SELECT " + KEY_LIST_NAME + " FROM " + LISTS_TABLE_NAME;
+        String selectAllListNamesQuery = "SELECT " + KEY_LIST_NAME + " FROM " + LISTS_TABLE_NAME + " WHERE " + KEY_IN_TRASH + " = " + IN_TRASH_FALSE;
 
         Cursor cursor = db.rawQuery(selectAllListNamesQuery, null);
-
         if (cursor.moveToFirst()) {
             do {
                 String listName = cursor.getString(0);
                 listNamesList.add(listName);
-                Log.d(LOG_TAG, "getAllListNames(): list: " + listName);
+                Log.d(LOG_TAG, "getAllListNamesNotFromTrash(): list: " + listName);
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -116,8 +147,18 @@ public class ListsDao implements TableHelper {
     }
 
 
-    public void updateList() {
+    public void updateList(NotesList list) {
+        Log.d(LOG_TAG, "Updating list: id = " + list.id + ", name = '" + list.name + "'");
+        ContentValues values = new ContentValues();
+        values.put(KEY_LIST_NAME, list.name);
+        values.put(KEY_IN_TRASH, list.inTrash);
+        int result = db.update(LISTS_TABLE_NAME, values, KEY_LIST_ID + " = ?",
+                new String[] { String.valueOf(list.id) });
+    }
 
+    public void moveListToTrash(NotesList list) {
+        list.inTrash = true;
+        updateList(list);
     }
 
     public void deleteList() {

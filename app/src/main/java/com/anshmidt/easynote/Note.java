@@ -23,11 +23,11 @@ public class Note {
     //public final int DEFAULT_PRIORITY_ID = 2;  //NORMAL
     private final String LOG_TAG = Note.class.getSimpleName();
 
-    public Note(int id, long modificationTime, String text, Priority priority, NotesList list) {  // for getAllNotes in DbHelper
+    public Note(int id, long modificationTime, String text, boolean inTrash, Priority priority, NotesList list) {  // for getAllNotes in DbHelper
         this.id = id;
         this.modificationTime = modificationTime;
         this.text = text;
-//        this.inTrash = inTrash;
+        this.inTrash = inTrash;
         this.priority = priority;
         this.list = list;
     }

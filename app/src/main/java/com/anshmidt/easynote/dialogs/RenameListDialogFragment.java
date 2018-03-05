@@ -1,4 +1,4 @@
-package com.anshmidt.easynote;
+package com.anshmidt.easynote.dialogs;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,6 +12,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.anshmidt.easynote.KeyboardHelper;
+import com.anshmidt.easynote.R;
+
 /**
  * Created by Ilya Anshmidt on 17.02.2018.
  */
@@ -21,11 +24,17 @@ public class RenameListDialogFragment extends DialogFragment {
 
     public interface RenameListDialogListener {
         void onListRenamed(String listName);
+        void onListAdded(String listName);
     }
 
+    public final String KEY_CURRENT_LIST_NAME = "current_list_name";
+    public final String FRAGMENT_TAG = "renameListDialog";
     EditText renameListEditText;
     KeyboardHelper keyboardHelper;
     boolean listNameValid = true;
+    String CREATED_LIST_DEFAULT_NAME = "";
+    enum Mode { adding, renaming }
+    Mode mode;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -37,8 +46,16 @@ public class RenameListDialogFragment extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(subView);
 
-//        String getArgument = getArguments().getString("number_of_alarms");
-//        renameListEditText.setText(getArgument);
+        Bundle bundle = getArguments();
+        String currentListName = CREATED_LIST_DEFAULT_NAME;
+        if (bundle != null) {
+            mode = Mode.renaming;
+            currentListName = bundle.getString(KEY_CURRENT_LIST_NAME);
+        } else {
+            mode = Mode.adding;
+        }
+
+        renameListEditText.setText(currentListName);
         keyboardHelper.moveCursorToEnd(renameListEditText);
         keyboardHelper.showKeyboard(renameListEditText);
 
@@ -46,16 +63,18 @@ public class RenameListDialogFragment extends DialogFragment {
         builder.setPositiveButton(R.string.rename_list_dialog_ok_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                String numberStr = renameListEditText.getText().toString();
+                String listName = renameListEditText.getText().toString();
                 if (listNameValid) {
                     RenameListDialogListener activity = (RenameListDialogListener) getActivity();
-                    activity.onListRenamed(numberStr);
+
+                    if (mode == Mode.renaming) {
+                        activity.onListRenamed(listName);
+                    } else {
+                        activity.onListAdded(listName);
+                    }
                     keyboardHelper.hideKeyboard(renameListEditText);
                 }
 
-//                RenameListDialogListener activity = (RenameListDialogListener) getActivity();
-//                activity.onNumberOfAlarmsChanged(renameListEditText.getText().toString());
-//                keyboardHelper.hideKeyboard(renameListEditText);
             }
         });
 
@@ -79,7 +98,7 @@ public class RenameListDialogFragment extends DialogFragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (isValid(s.toString())) {
+                if (isListNameValid(s.toString())) {
                     listNameValid = true;
                     dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                 } else {
@@ -93,7 +112,7 @@ public class RenameListDialogFragment extends DialogFragment {
     }
 
 
-    private boolean isValid(String str) {
+    private boolean isListNameValid(String str) {
         if (TextUtils.isEmpty(str)) {
             return false;
         } else {

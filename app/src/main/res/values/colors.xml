@@ -4,6 +4,7 @@
     <color name="primaryDark">#007c91</color>
     <color name="mainBackgroundColor">#ececec</color>
     <color name="notesTextColor">#595959</color>
+    <color name="listNameInNoteTextColor">#bbbbbb</color>
     <color name="noteBackground">#ffffff</color>
     <color name="menuIcons">#ffffffff</color>
     <color name="cursorColorInSearch">#eeeeee</color>

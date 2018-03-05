@@ -31,6 +31,10 @@
                 android:value="com.anshmidt.easynote.activities.MainActivity" />
         </activity>
 
+        <activity android:name=".activities.TrashActivity"
+            android:parentActivityName="com.anshmidt.easynote.activities.MainActivity">
+        </activity>
+
 
     </application>
 

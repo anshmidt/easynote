@@ -41,7 +41,8 @@ public class EditNoteActivity extends BaseActivity {
         rv.setLayoutManager(llm);
         rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
-        notesList = databaseHelper.getAllNotes();
+//        notesList = databaseHelper.getAllNotes();
+        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList());
         adapter = new NotesListAdapter(notesList, this);
         setNotesListAdapter(adapter);
         rv.setAdapter(adapter);

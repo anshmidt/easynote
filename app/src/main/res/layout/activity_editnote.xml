@@ -4,14 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/mainBackgroundColor"
     tools:context="com.anshmidt.easynote.activities.EditNoteActivity"
     >
 
 
 
     <include
-        android:id="@+id/toolbar"
-        layout="@layout/toolbar"
+        android:id="@+id/toolbar_main"
+        layout="@layout/toolbar_main"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:visibility="visible"
@@ -30,9 +31,9 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         tools:layout_constraintTop_creator="1"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_main"
         tools:layout_constraintLeft_creator="1"
-        app:layout_constraintLeft_toLeftOf="@+id/toolbar" />
+        app:layout_constraintLeft_toLeftOf="@+id/toolbar_main" />
 
 
 

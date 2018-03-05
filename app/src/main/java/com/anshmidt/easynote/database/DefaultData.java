@@ -31,7 +31,7 @@ public class DefaultData {  // what is in the db when user installs the app
         defaultNotes.add(new Note(1320000000000L, "Second note", false, 2, 1));
         defaultNotes.add(new Note(1330000000000L, "Third note", false, 2, 1));
         defaultNotes.add(new Note(1340000000000L, "Fourth minor note", false, 3, 1));
-        defaultNotes.add(new Note(1350000000000L, "Fifth important note", false, 1, 1));
+        defaultNotes.add(new Note(1350000000000L, "Fifth important: iOS driver should be re-initialized after each test", false, 1, 1));
         defaultNotes.add(new Note(1360000000000L, "Sixth note", false, 2, 1));
         defaultNotes.add(new Note(1380000000000L, "7 note", false, 2, 1));
         defaultNotes.add(new Note(1390000000000L, "8 note", false, 2, 1));
@@ -55,8 +55,8 @@ public class DefaultData {  // what is in the db when user installs the app
         defaultNotes.add(new Note(1490000000026L, "26 (list2) note", false, 2, 2));
         defaultNotes.add(new Note(1490000000027L, "27 (list3) note", false, 2, 3));
         defaultNotes.add(new Note(1490000000028L, "28 note", false, 2, 1));
-        defaultNotes.add(new Note(1490000000029L, "29 note", false, 2, 1));
-        defaultNotes.add(new Note(1490000000030L, "30 note", false, 2, 1));
+        defaultNotes.add(new Note(1490000000029L, "Сделать инструмент для установки штуцеров.", false, 2, 1));
+        defaultNotes.add(new Note(1490000000030L, "30 - my lock number", false, 2, 1));
 
         return defaultNotes;
     }

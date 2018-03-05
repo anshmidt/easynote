@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import com.anshmidt.easynote.activities.EditNoteActivity;
 import com.anshmidt.easynote.activities.MainActivity;
+import com.anshmidt.easynote.activities.TrashActivity;
 import com.anshmidt.easynote.database.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -36,22 +37,23 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     public int longPressedNotePosition = -1;
     private final String LOG_TAG = NotesListAdapter.class.getSimpleName();
 
-    public final int CONTEXT_MENU_ITEM_MAKE_IMPORTANT = 1;
-    public final int CONTEXT_MENU_ITEM_MAKE_NORMAL = 2;
-    public final int CONTEXT_MENU_ITEM_MAKE_MINOR = 3;
+    public final int MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID = 1;
+    public final int MAIN_CONTEXT_MENU_ITEM_MAKE_NORMAL_ID = 2;
+    public final int MAIN_CONTEXT_MENU_ITEM_MAKE_MINOR_ID = 3;
+
+    public final int TRASH_CONTEXT_MENU_ITEM_PUT_BACK_ID = 1;
 
     public class NoteViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnFocusChangeListener, View.OnCreateContextMenuListener {
         TextView noteTextView;
+        TextView listNameTextView;
         EditText noteEditText;
 //        View itemView;
 
         NoteViewHolder(View itemView) {
             super(itemView);
 //            this.itemView = (TextView) itemView;
-
-            if (context instanceof MainActivity) {
-                noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
-            } else {
+            listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
+            if (context instanceof EditNoteActivity) {
                 noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
                 noteEditText.setOnFocusChangeListener(this);
                 noteEditText.addTextChangedListener(new TextWatcher() {
@@ -77,6 +79,14 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                     public void afterTextChanged(Editable s) {
                     }
                 });
+            } else if (context instanceof MainActivity) {
+                noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
+                listNameTextView.setVisibility(View.GONE);
+                //dontShowListName(itemView, listNameTextView);
+            } else if (context instanceof TrashActivity) {
+                noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
+                listNameTextView.setVisibility(View.VISIBLE);
+//                showListName(itemView, listNameTextView);
             }
 
             itemView.setOnClickListener(this);
@@ -122,7 +132,10 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             if (context instanceof MainActivity) {
-                displayContextMenu(v, longPressedNotePosition, menu);
+                displayMainContextMenu(v, longPressedNotePosition, menu);
+            }
+            if (context instanceof TrashActivity) {
+                displayTrashContextMenu(v, longPressedNotePosition, menu);
             }
         }
     }
@@ -140,10 +153,10 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     @Override
     public NoteViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)  {
         View view;
-        if (context instanceof MainActivity){
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
-        } else {
+        if (context instanceof EditNoteActivity){
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.editable_note, viewGroup, false);
+        } else {
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
         }
         return new NoteViewHolder(view);
     }
@@ -153,25 +166,15 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     public void onBindViewHolder(final NoteViewHolder noteViewHolder, final int i) {
         TextView noteView;
 
-        if (context instanceof MainActivity) {
-            noteView = noteViewHolder.noteTextView;
-            //noteViewHolder.noteTextView.setText(notesList.get(i).getText());
-        } else {
+        if (context instanceof EditNoteActivity) {
             noteView = noteViewHolder.noteEditText;
-            //noteViewHolder.noteEditText.setText(notesList.get(i).getText());
+        } else {
+            noteView = noteViewHolder.noteTextView;
         }
         noteView.setText(notesList.get(i).text);
 
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
-//        //debug
-//        if (notePriority.equals(priorityInfo.IMPORTANT)) {
-//            Log.d(LOG_TAG, "Displaying important priority for note: ");
-//            notesList.get(i).printContentToLog();
-//        }
-//        if (notesList.get(i).text.equals("12 note")) {
-//            notesList.get(i).printContentToLog();
-//        }
 
 
         if (selectedNotePosition == i) {
@@ -182,6 +185,10 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                 //noteViewHolder.noteEditText.setSelection(noteViewHolder.noteEditText.getText().length()); //move cursor_searchview to the end of the note
                 noteEditText.setSelection(noteEditText.getText().length()); //move cursor_searchview to the end of the note
             }
+        }
+
+        if (noteViewHolder.listNameTextView != null) {
+            noteViewHolder.listNameTextView.setText(notesList.get(i).list.name);
         }
     }
 
@@ -265,7 +272,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         return getNoteText(selectedNotePosition);
     }
 
-    private void displayContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
+    private void displayMainContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
         //menu.setHeaderTitle("Select The Action");
 
         String titlePrefix = context.getString(R.string.note_context_menu_change_priority_title) + " ";
@@ -277,14 +284,19 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         Priority currentPriority = longPressedNote.priority;
 
         if (! currentPriority.equals(priorityInfo.IMPORTANT)) {
-            menu.add(0, CONTEXT_MENU_ITEM_MAKE_IMPORTANT, 0, titleSetImportantPriority);
+            menu.add(0, MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID, 0, titleSetImportantPriority);
         }
         if (! currentPriority.equals(priorityInfo.NORMAL)) {
-            menu.add(0, CONTEXT_MENU_ITEM_MAKE_NORMAL, 0, titleSetNormalPriority);
+            menu.add(0, MAIN_CONTEXT_MENU_ITEM_MAKE_NORMAL_ID, 0, titleSetNormalPriority);
         }
         if (! currentPriority.equals(priorityInfo.MINOR)) {
-            menu.add(0, CONTEXT_MENU_ITEM_MAKE_MINOR, 0, titleSetMinorPriority);
+            menu.add(0, MAIN_CONTEXT_MENU_ITEM_MAKE_MINOR_ID, 0, titleSetMinorPriority);
         }
+    }
+
+    private void displayTrashContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
+        String title = context.getString(R.string.note_context_menu_put_back_from_trash);
+        menu.add(0, TRASH_CONTEXT_MENU_ITEM_PUT_BACK_ID, 0, title);
     }
 
     public int whereToAddNewNote() {
@@ -318,6 +330,16 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 //                return modTime1.compareTo(modTime2);
                 return modTime2.compareTo(modTime1);
             }});
+    }
+
+    private void showListName(View itemView, View listNameTextView) {
+        //View listNameTextView = itemView.findViewById(R.id.note_listname_textview);
+        listNameTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void dontShowListName(View itemView, View listNameTextView) {
+        //View listNameTextView = itemView.findViewById(R.id.note_listname_textview);
+        listNameTextView.setVisibility(View.GONE);
     }
 
 }

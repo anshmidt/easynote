@@ -44,16 +44,16 @@
         android:orderInCategory="102"
         android:title="@string/menu_open_trash_title"
         app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_recreate_db"
-        android:orderInCategory="103"
-        android:title="@string/menu_restore_db"
-        app:showAsAction="never"/>
-    <item
-        android:id="@+id/action_perform_sql_request"
-        android:orderInCategory="104"
-        android:title="@string/menu_perform_sql_request"
-        app:showAsAction="never"/>
+    <!--<item-->
+        <!--android:id="@+id/action_recreate_db"-->
+        <!--android:orderInCategory="103"-->
+        <!--android:title="@string/menu_restore_db"-->
+        <!--app:showAsAction="never"/>-->
+    <!--<item-->
+        <!--android:id="@+id/action_perform_sql_request"-->
+        <!--android:orderInCategory="104"-->
+        <!--android:title="@string/menu_perform_sql_request"-->
+        <!--app:showAsAction="never"/>-->
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="105"

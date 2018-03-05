@@ -82,12 +82,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notesDao.addNote(note);
     }
 
+    public void addList(NotesList notesList) {
+        listsDao.addList(notesList);
+    }
+
     public void performSqlRequest() {  //for debugging
         Log.d(LOG_TAG, "getPriorityIdByName(\"Important\") = " + priorityDao.getPriorityIdByName("Important"));
     }
 
-    public ArrayList<Note> getAllNotes() {
-        return notesDao.getAllNotes();
+//    public ArrayList<Note> getAllNotes() {
+//        return notesDao.getAllNotes();
+//    }
+
+    public ArrayList<Note> getAllNotesFromList(NotesList list) {
+        return notesDao.getAllNotesFromList(list);
+    }
+
+    public ArrayList<Note> getAllNotesFromTrash() {
+        return notesDao.getAllNotesFromTrash();
     }
 
     public void printAllNotes() {
@@ -98,21 +110,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notesDao.deleteNote(note);
     }
 
+    public void moveNoteToTrash(Note note) {
+        notesDao.moveNoteToTrash(note);
+    }
+
+    public void moveListToTrash(NotesList list) {
+        listsDao.moveListToTrash(list);
+    }
+
+    public void moveAllNotesFromListToTrash(NotesList list) {
+        ArrayList<Note> allNotesFromList = getAllNotesFromList(list);
+        for (int i = 0; i<allNotesFromList.size(); i++) {
+            moveNoteToTrash(allNotesFromList.get(i));
+        }
+    }
+
     public void updateNote(Note note) {
         notesDao.updateNote(note);
     }
 
-    public int getEmptyNotesCount() {
-        return notesDao.getEmptyNotesCount();
+    public int getEmptyNotesCountInList(NotesList list) {
+        return notesDao.getEmptyNotesCountInList(list);
     }
 
-    public void deleteEmptyNotes() {
-        notesDao.deleteEmptyNotes();
+    public void deleteEmptyNotesFromList(NotesList list) {
+        notesDao.deleteEmptyNotesFromList(list);
     }
 
     public List<String> getAllListNames() {
-        return listsDao.getAllListNames();
+        return listsDao.getAllListNamesNotFromTrash();
     }
 
+    public String getListNameById(int listId) {
+        return listsDao.getListById(listId).name;
+    }
+
+    public int getListIdByName(String listName) {
+        return listsDao.getListIdByName(listName);
+    }
+
+    public NotesList getListById(int listId) {
+        return listsDao.getListById(listId);
+    }
+
+    public void updateList(NotesList list) {
+        listsDao.updateList(list);
+    }
+
+    public void deleteAllEmptyNotes() {
+        notesDao.deleteAllEmptyNotes();
+    }
 
 }

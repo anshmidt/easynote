@@ -1,46 +1,53 @@
-package com.anshmidt.easynote;
+package com.anshmidt.easynote.list_names_spinner;
 
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Typeface;
-import android.os.Bundle;
 
 import android.support.v4.content.ContextCompat;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.ArrayList;
+import com.anshmidt.easynote.R;
+import com.anshmidt.easynote.SharedPreferencesHelper;
+import com.anshmidt.easynote.dialogs.RenameListDialogFragment;
+
 import java.util.List;
 
 /**
  * Created by Ilya Anshmidt on 17.02.2018.
  */
 
-public class ListsSpinnerAdapter extends ArrayAdapter<String> {
+public class ListNamesSpinnerAdapter extends ArrayAdapter<String> {
 
     private Context context;
-    public List<String> arrayList;
+    private SharedPreferencesHelper sharPrefHelper;
+    public List<String> listsList;
     public static String ADD_NEW_LIST_LABEL;
 
-    public ListsSpinnerAdapter(Context context, int textViewResourceId,
-                               List<String> arrayList) {
-        super(context, textViewResourceId, addCreateListItem(arrayList, context));
+    public ListNamesSpinnerAdapter(Context context, int textViewResourceId,
+                                   List<String> listsList) {
+        super(context, textViewResourceId, addCreateListItem(listsList, context));
         this.context = context;
-        this.arrayList = arrayList;
-
+        this.listsList = listsList;
+        this.sharPrefHelper = new SharedPreferencesHelper(context);
 
     }
 
 
     private static List<String> addCreateListItem(List<String> arrayList, Context context) {
         ADD_NEW_LIST_LABEL = context.getString(R.string.add_new_list_label);
-        arrayList.add(ADD_NEW_LIST_LABEL);
+        if (! arrayList.contains(ADD_NEW_LIST_LABEL)) {
+            arrayList.add(ADD_NEW_LIST_LABEL);
+        } else {
+            if (arrayList.indexOf(ADD_NEW_LIST_LABEL) < arrayList.size() - 1) {  //if this item not last, make it last
+                arrayList.remove(ADD_NEW_LIST_LABEL);
+                arrayList.add(ADD_NEW_LIST_LABEL);
+            }
+        }
         return arrayList;
     }
 
@@ -48,23 +55,18 @@ public class ListsSpinnerAdapter extends ArrayAdapter<String> {
     public View getDropDownView(int position, final View convertView,
                                 ViewGroup parent) {
         View view = super.getDropDownView(position, convertView, parent);
-        TextView textView = (TextView) view;
-        if (arrayList.get(position).equals(ADD_NEW_LIST_LABEL)) {
+        final TextView textView = (TextView) view;
+        if (listsList.get(position).equals(ADD_NEW_LIST_LABEL)) {
             textView.setTypeface(null, Typeface.NORMAL);
             textView.setBackgroundColor(ContextCompat.getColor(context, R.color.primaryDark));
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-//                    Toast.makeText(context, "Add list clicked", Toast.LENGTH_LONG).show();
-                    RenameListDialogFragment dialog = new RenameListDialogFragment();
-//                    Bundle numberOfAlarmsBundle = new Bundle();
-//                    numberOfAlarmsBundle.putString("number_of_alarms", sharPrefHelper.getNumberOfAlarmsStr());
-//                    dialog.setArguments(numberOfAlarmsBundle);
-                    FragmentManager manager = ((Activity) context).getFragmentManager();
-                    dialog.show(manager, "renameListDialog");
-
-                }
-            });
+//            textView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    RenameListDialogFragment renameListDialogFragment = new RenameListDialogFragment();
+//                    FragmentManager manager = ((Activity) context).getFragmentManager();
+//                    renameListDialogFragment.show(manager, renameListDialogFragment.FRAGMENT_TAG);
+//                }
+//            });
         } else {
             textView.setBackgroundColor(ContextCompat.getColor(context, R.color.primary));
             textView.setTypeface(null, Typeface.BOLD);
@@ -75,11 +77,12 @@ public class ListsSpinnerAdapter extends ArrayAdapter<String> {
 
     @Override
     public boolean isEnabled(int position) {
-        if (arrayList.get(position).equals(ADD_NEW_LIST_LABEL)) {
-            return false;
-        } else {
-            return true;
-        }
+        return true;
+//        if (listsList.get(position).equals(ADD_NEW_LIST_LABEL)) {
+//            return false;
+//        } else {
+//            return true;
+//        }
 
     }
 
