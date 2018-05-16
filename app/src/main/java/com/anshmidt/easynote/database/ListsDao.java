@@ -97,20 +97,7 @@ public class ListsDao implements TableHelper {
         return listId;
     }
 
-//    public String getListNameById(int listId) {
-////        String selectListNameQuery = "SELECT " + KEY_LIST_NAME
-////                + " FROM " + LISTS_TABLE_NAME
-////                + " WHERE " + KEY_LIST_ID + " = " + listId;
-////        Cursor cursor = db.rawQuery(selectListNameQuery, null);
-////
-////        String listName = "";
-////        if (cursor.moveToFirst()) {
-////            listName = cursor.getString(cursor.getColumnIndex(KEY_LIST_NAME));
-////        }
-////
-////        cursor.close();
-////        return listName;
-//    }
+
 
     public NotesList getListById(int id) {
         String selectListQuery = "SELECT " + KEY_LIST_NAME + ", " + KEY_IN_TRASH
@@ -147,6 +134,7 @@ public class ListsDao implements TableHelper {
     }
 
 
+
     public void updateList(NotesList list) {
         Log.d(LOG_TAG, "Updating list: id = " + list.id + ", name = '" + list.name + "'");
         ContentValues values = new ContentValues();
@@ -159,6 +147,12 @@ public class ListsDao implements TableHelper {
     public void moveListToTrash(NotesList list) {
         list.inTrash = true;
         updateList(list);
+    }
+
+    public void deleteTrashLists() {
+        String query = "DELETE FROM " + LISTS_TABLE_NAME + " WHERE " + KEY_IN_TRASH + " = " + IN_TRASH_TRUE;
+        db.execSQL(query);
+        Log.d(LOG_TAG, "All trash lists deleted");
     }
 
     public void deleteList() {

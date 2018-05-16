@@ -5,16 +5,23 @@
     <string name="menu_open_trash_title">Open Trash</string>
     <string name="menu_settings_title">Settings</string>
     <string name="menu_rename_list_title">Rename list</string>
-    <string name="menu_delete_list_title">Move list to trash</string>
+    <string name="menu_delete_list_title">Move list to Trash</string>
     <string name="menu_restore_db">Restore DB</string>
     <string name="menu_perform_sql_request">Perform SQL request</string>
+    <string name="menu_copy_list_to_clipboard">Copy list to clipboard</string>
     <string name="note_context_menu_change_priority_title">Make</string>
-    <string name="new_note_hint">...</string>
+    <string name="note_context_menu_move">Move</string>
+    <string name="new_note_hint">Enter note text...</string>
     <string name="add_new_list_label">Add new list</string>
+
+    <string name="list_copied_to_clipboard_toast">Notes from list \'%1$s\' with normal and important priority copied to clipboard</string>
 
     <string name="rename_list_dialog_title">Enter list name:</string>
     <string name="rename_list_dialog_ok_button">OK</string>
     <string name="rename_list_dialog_cancel_button">Cancel</string>
+
+    <string name="move_note_dialog_title">Move note to another list:</string>
+    <string name="note_moved_toast">Note moved to list \'%1$s\'</string>
 
     <string name="delete_list_confirmation_dialog_text">Move list \'%1$s\' and all its notes to trash?</string>
 

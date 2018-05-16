@@ -1,6 +1,9 @@
 package com.anshmidt.easynote.activities;
 
 import android.app.FragmentManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
@@ -9,6 +12,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,6 +23,8 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.anshmidt.easynote.NotesAdapter;
+import com.anshmidt.easynote.NotesFormatter;
 import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
 import com.anshmidt.easynote.list_names_spinner.ListNamesSpinnerController;
 import com.anshmidt.easynote.NotesList;
@@ -26,7 +32,6 @@ import com.anshmidt.easynote.dialogs.RenameListDialogFragment;
 import com.anshmidt.easynote.SharedPreferencesHelper;
 import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
-import com.anshmidt.easynote.NotesListAdapter;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
@@ -45,7 +50,7 @@ public abstract class BaseActivity extends AppCompatActivity
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
     protected RecyclerView rv;
     protected LinearLayoutManager llm;
-    private NotesListAdapter notesListAdapter;
+    private NotesAdapter notesAdapter;
     private DatabaseHelper databaseHelper;
     SearchView searchView;
     ImageView clearSearchButton;
@@ -53,12 +58,10 @@ public abstract class BaseActivity extends AppCompatActivity
     String searchRequest;
     Toolbar toolbar;
     Spinner listNamesSpinner;
-//    ListNamesSpinnerAdapter listNamesSpinnerAdapter;
     ListNamesSpinnerController listNamesSpinnerController;
 
-
-    //NotesList currentList;
     SharedPreferencesHelper sharPrefHelper;
+    protected Toast movedToTrashToast = null;
 
 
 
@@ -68,16 +71,7 @@ public abstract class BaseActivity extends AppCompatActivity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(BaseActivity.this);
-
-        //temp
-        databaseHelper.printAllNotes();
-        //end of temp
-
         sharPrefHelper = new SharedPreferencesHelper(BaseActivity.this);
-//        int currentListId = sharPrefHelper.getLastOpenedListId();
-//        currentList = new NotesList(currentListId);
-
-
         toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -115,7 +109,7 @@ public abstract class BaseActivity extends AppCompatActivity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String searchRequest) {
-                notesListAdapter.filter(searchRequest);
+                notesAdapter.filter(searchRequest);
                 setSearchRequest(searchRequest);
                 return false;
             }
@@ -123,7 +117,7 @@ public abstract class BaseActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextChange(String searchRequest) {
                 if (! searchRequest.equals("")) {
-                    notesListAdapter.filter(searchRequest);
+                    notesAdapter.filter(searchRequest);
                 }
                 setSearchRequest(searchRequest);
                 return false;
@@ -134,7 +128,7 @@ public abstract class BaseActivity extends AppCompatActivity
         clearSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                notesListAdapter.resetFilter();
+                notesAdapter.resetFilter();
                 searchField = (EditText) findViewById(R.id.search_src_text);
                 searchField.setText("");
             }
@@ -142,7 +136,7 @@ public abstract class BaseActivity extends AppCompatActivity
 
         if (searchRequest != null) {
             Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + searchRequest);
-            notesListAdapter.filter(searchRequest);
+            notesAdapter.filter(searchRequest);
         }
 
         return true;
@@ -152,8 +146,8 @@ public abstract class BaseActivity extends AppCompatActivity
     public void onListSelected() {
         NotesList currentList = listNamesSpinnerController.getCurrentList();
         ArrayList<Note> notes = databaseHelper.getAllNotesFromList(currentList);
-        notesListAdapter.notesList = notes;
-        notesListAdapter.notifyDataSetChanged();
+        notesAdapter.notesList = notes;
+        notesAdapter.notifyDataSetChanged();
 
     }
 
@@ -165,7 +159,7 @@ public abstract class BaseActivity extends AppCompatActivity
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
                 setItemsVisibility(menu, searchItem, true);
-                notesListAdapter.resetFilter();
+                notesAdapter.resetFilter();
                 return true;
             }
             @Override
@@ -191,22 +185,20 @@ public abstract class BaseActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.action_add: {
-                if (databaseHelper.getEmptyNotesCountInList(listNamesSpinnerController.getCurrentList()) > 0) {
-                    return super.onOptionsItemSelected(item);
-                }
+                //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
 
-                int newNotePosition = getNotesListAdapter().whereToAddNewNote();
+                int newNotePosition = getNotesAdapter().whereToAddNewNote();
                 if (this instanceof MainActivity) {
                     openEditNoteActivity(newNotePosition);
                 }
-                Note newNote = new Note("", getBaseContext());
+                Note newNote = new Note("", BaseActivity.this);
+                newNote.list = listNamesSpinnerController.getCurrentList();
+                newNote.id = databaseHelper.addNote(newNote);
 
-                notesListAdapter.add(newNotePosition, newNote);
+                notesAdapter.add(newNotePosition, newNote);
                 rv = (RecyclerView)findViewById(R.id.recyclerView);
                 rv.getLayoutManager().scrollToPosition(newNotePosition);
-                notesListAdapter.setSelectedNotePosition(newNotePosition);
-                newNote.list = listNamesSpinnerController.getCurrentList();
-                databaseHelper.addNote(newNote);
+                notesAdapter.setSelectedNotePosition(newNotePosition);
                 break;
             }
             case R.id.action_rename_list: {
@@ -229,6 +221,18 @@ public abstract class BaseActivity extends AppCompatActivity
             }
             case R.id.action_open_trash: {
                 startActivity(new Intent(this, TrashActivity.class));
+                break;
+            }
+            case R.id.action_copy_list_to_clipboard: {
+                NotesFormatter notesFormatter = new NotesFormatter(BaseActivity.this);
+                String textToCopy = notesFormatter.notesOfOneListToString(notesAdapter.notesList);
+
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText(null, textToCopy);
+                clipboard.setPrimaryClip(clip);
+
+                String toastMessage = getString(R.string.list_copied_to_clipboard_toast, listNamesSpinnerController.getCurrentList().name);
+                Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_LONG).show();
                 break;
             }
 //            case R.id.action_recreate_db: {  //for debug purposes only
@@ -270,12 +274,12 @@ public abstract class BaseActivity extends AppCompatActivity
         this.searchRequest = request;
     }
 
-    protected NotesListAdapter getNotesListAdapter() {
-        return notesListAdapter;
+    protected NotesAdapter getNotesAdapter() {
+        return notesAdapter;
     }
 
-    protected void setNotesListAdapter(NotesListAdapter adapter) {
-        this.notesListAdapter = adapter;
+    protected void setNotesAdapter(NotesAdapter adapter) {
+        this.notesAdapter = adapter;
     }
 
     @Override
@@ -300,5 +304,34 @@ public abstract class BaseActivity extends AppCompatActivity
         databaseHelper.moveListToTrash(list);
         databaseHelper.moveAllNotesFromListToTrash(list);
         listNamesSpinnerController.onListMovedToTrash(list);
+    }
+
+    protected void setItemSwipeCallback(final NotesAdapter notesAdapter, RecyclerView rv) {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+                int position = viewHolder.getAdapterPosition();
+                Note noteToRemove = notesAdapter.getNote(position);
+
+                notesAdapter.remove(position);
+                databaseHelper.moveNoteToTrash(noteToRemove);
+                if (movedToTrashToast != null) {
+                    movedToTrashToast.cancel();
+                }
+                movedToTrashToast = Toast.makeText(BaseActivity.this, getString(R.string.note_moved_to_trash_toast), Toast.LENGTH_SHORT);
+                movedToTrashToast.show();
+
+            }
+
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(rv);
     }
 }

@@ -74,7 +74,7 @@ public class NotesDao implements TableHelper {
         }
     }
 
-    public void addNote(Note note) {
+    public int addNote(Note note) {  //returns note.id in db
         ContentValues values = new ContentValues();
         values.put(KEY_MODIFIED_AT, note.modificationTime);
         values.put(KEY_TEXT, note.text);
@@ -94,9 +94,11 @@ public class NotesDao implements TableHelper {
         }
         values.put(KEY_LIST_ID, note.list.id);
 
-        db.insert(NOTES_TABLE_NAME, null, values);
-        Log.d(LOG_TAG, "Note inserted: " + note.modificationTime + ", " + note.text + ", " + note.inTrash
-                + ", " + note.priority.id + ", " + note.list.id);
+        long newNoteId = db.insert(NOTES_TABLE_NAME, null, values);
+        note.id = (int) newNoteId;
+        Log.d(LOG_TAG, "Note inserted:");
+        note.printContentToLog();
+        return note.id;
     }
 
     public Note getNoteById(int id) {
@@ -258,8 +260,8 @@ public class NotesDao implements TableHelper {
                 Note note = new Note(noteId, noteModificationTime, noteText, noteInTrash, notePriority, list);
 
                 notesList.add(note);
-                Log.d(LOG_TAG, "note: ");
-                note.printContentToLog();
+//                Log.d(LOG_TAG, "note: ");
+//                note.printContentToLog();
             } while (cursor.moveToNext());
         }
         cursor.close();
@@ -296,6 +298,15 @@ public class NotesDao implements TableHelper {
 
         int result = db.update(NOTES_TABLE_NAME, values, KEY_NOTE_ID + " = ?",
                 new String[] { String.valueOf(note.id) });
+
+        //temp: check if note really updated
+        Note thisNoteAfterUpdate = getNoteById(note.id);
+        Log.d(LOG_TAG, "note in db after update:");
+        if (thisNoteAfterUpdate != null) {
+            thisNoteAfterUpdate.printContentToLog();
+        } else {
+            Log.d(LOG_TAG, "note in db is null");
+        }
     }
 
     public void deleteNote(Note note) {
@@ -324,18 +335,32 @@ public class NotesDao implements TableHelper {
         getEmptyNotesCountInList(list);
     }
 
+    public void deleteTrashNotes() {
+        String query = "DELETE FROM " + NOTES_TABLE_NAME + " WHERE " + KEY_IN_TRASH + " = " + IN_TRASH_TRUE;
+        db.execSQL(query);
+        Log.d(LOG_TAG, "All trash notes deleted");
+    }
+
     public void moveNoteToTrash(Note note) {
         note.inTrash = true;
         updateNote(note);
     }
 
+    public void moveNoteToAnotherList(Note noteToMove, NotesList destinationList) {
+        noteToMove.list.id = destinationList.id;
+        updateNote(noteToMove);
+    }
+
     private boolean shouldModificationTimeBeUpdated(Note noteBeforeUpdate, Note noteAfterUpdate) {
+        if (noteBeforeUpdate == null) {
+            return true;
+        }
         if (! noteBeforeUpdate.text.equals(noteAfterUpdate.text)) {
             return true;
         }
-        if (noteBeforeUpdate.inTrash != noteAfterUpdate.inTrash) {
-            return true;
-        }
+//        if (noteBeforeUpdate.inTrash != noteAfterUpdate.inTrash) {
+//            return false;
+//        }
         return false;
     }
 

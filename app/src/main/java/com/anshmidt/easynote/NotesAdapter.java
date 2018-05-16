@@ -4,6 +4,8 @@ package com.anshmidt.easynote;
  * Created by Ilya Anshmidt on 02.09.2017.
  */
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -13,6 +15,8 @@ import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+//import android.widget.EditText;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -25,9 +29,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.NoteViewHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHolder> {
 
     private Context context;
+    private View contentView;
     private DatabaseHelper databaseHelper;
     private NoteDecorator noteDecorator;
     private PriorityInfo priorityInfo;
@@ -35,11 +40,14 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     private ArrayList<Note> searchResultsList = new ArrayList<>();  //for search results
     private int selectedNotePosition = -1;
     public int longPressedNotePosition = -1;
-    private final String LOG_TAG = NotesListAdapter.class.getSimpleName();
+    private final String LOG_TAG = NotesAdapter.class.getSimpleName();
+    private boolean justCreated = true;
+
 
     public final int MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID = 1;
     public final int MAIN_CONTEXT_MENU_ITEM_MAKE_NORMAL_ID = 2;
     public final int MAIN_CONTEXT_MENU_ITEM_MAKE_MINOR_ID = 3;
+    public final int MAIN_CONTEXT_MENU_ITEM_MOVE_ID = 4;
 
     public final int TRASH_CONTEXT_MENU_ITEM_PUT_BACK_ID = 1;
 
@@ -47,6 +55,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         TextView noteTextView;
         TextView listNameTextView;
         EditText noteEditText;
+        InputMethodManager imm;
 //        View itemView;
 
         NoteViewHolder(View itemView) {
@@ -54,6 +63,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
 //            this.itemView = (TextView) itemView;
             listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
             if (context instanceof EditNoteActivity) {
+                imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                 noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
                 noteEditText.setOnFocusChangeListener(this);
                 noteEditText.addTextChangedListener(new TextWatcher() {
@@ -79,25 +89,45 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
                     public void afterTextChanged(Editable s) {
                     }
                 });
+
+
             } else if (context instanceof MainActivity) {
                 noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
                 listNameTextView.setVisibility(View.GONE);
-                //dontShowListName(itemView, listNameTextView);
+                itemView.setOnClickListener(this);
+
+                itemView.setOnCreateContextMenuListener(this);
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longPressedNotePosition = getAdapterPosition();
+                        return false;
+                    }
+                });
             } else if (context instanceof TrashActivity) {
                 noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
                 listNameTextView.setVisibility(View.VISIBLE);
-//                showListName(itemView, listNameTextView);
+
+                itemView.setOnClickListener(this);
+                itemView.setOnCreateContextMenuListener(this);
+                itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        longPressedNotePosition = getAdapterPosition();
+                        return false;
+                    }
+                });
             }
 
-            itemView.setOnClickListener(this);
-            itemView.setOnCreateContextMenuListener(this);
-            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    longPressedNotePosition = getAdapterPosition();
-                    return false;
-                }
-            });
+//            itemView.setOnClickListener(this);
+//            itemView.setOnCreateContextMenuListener(this);
+//            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+//                @Override
+//                public boolean onLongClick(View v) {
+//                    longPressedNotePosition = getAdapterPosition();
+//                    return false;
+//                }
+//            });
         }
 
         @Override
@@ -108,16 +138,28 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
             if (context instanceof EditNoteActivity) {
+                EditText noteEditText = (EditText) v;
+                //imm.showSoftInput(noteEditText, InputMethodManager.SHOW_FORCED);
+                //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                 if (hasFocus) {
+                    int height = noteEditText.getHeight();
+                    Log.d(LOG_TAG, "height: " + height);
                     selectedNotePosition = getAdapterPosition();
                     Log.i(LOG_TAG, "onFocusChange: selected item: position: " + selectedNotePosition + ", id in database: " + getNoteDbId(selectedNotePosition));
 
-                    EditText noteEditText = (EditText) v;
+//                    imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);  //also works
+//                    if (height == 0) {
+                        //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+//                    }
+
+
                     if (noteEditText.getText().toString().equals("")) {
                         noteEditText.setHint(context.getString(R.string.new_note_hint));
                     }
+
                 } else {
-                    EditText noteEditText = (EditText) v;
+                    int height = noteEditText.getHeight();
+                    Log.d(LOG_TAG, "height: " + height);
                     if (noteEditText.getText().toString().equals("")) {
                         noteEditText.setHint("");
                     }
@@ -141,7 +183,7 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
     }
 
 
-    public NotesListAdapter(ArrayList<Note> notesList, Context context){
+    public NotesAdapter(ArrayList<Note> notesList, Context context){
         this.notesList = notesList;
         this.context = context;
         this.searchResultsList.addAll(notesList);
@@ -176,20 +218,59 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
 
+        if (context instanceof EditNoteActivity) {
 
-        if (selectedNotePosition == i) {
-            if (context instanceof EditNoteActivity) {
-                //noteViewHolder.noteEditText.requestFocus();
+            if (selectedNotePosition == i) {
                 EditText noteEditText = (EditText) noteView;
-                noteEditText.requestFocus();
-                //noteViewHolder.noteEditText.setSelection(noteViewHolder.noteEditText.getText().length()); //move cursor_searchview to the end of the note
+
+//                noteEditText.requestFocus();
+//                InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//                imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);
+
+
+//                noteEditText.requestFocus();
                 noteEditText.setSelection(noteEditText.getText().length()); //move cursor_searchview to the end of the note
+
+                //new
+//                InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//                imm.showSoftInput(noteEditText, InputMethodManager.SHOW_FORCED);
             }
         }
+
+//        //temp
+//        if (i == 0) {
+//            if (context instanceof EditNoteActivity) {
+//                EditText noteEditText = (EditText) noteView;
+//                noteEditText.requestFocus();
+//            }
+//        }
+//        //end of temp
 
         if (noteViewHolder.listNameTextView != null) {
             noteViewHolder.listNameTextView.setText(notesList.get(i).list.name);
         }
+    }
+
+
+    @Override
+    public void onViewAttachedToWindow(NoteViewHolder holder) {
+        super.onViewAttachedToWindow(holder);
+        if (holder.noteEditText != null) {
+            // fixes Android bug with some edittext not selectable: TextView does not support text selection: Selection cancelled.
+            holder.noteEditText.setEnabled(false);
+            holder.noteEditText.setEnabled(true);
+
+//            Log.d(LOG_TAG, "Info from onViewAttachedToWindow: " + holder.getAdapterPosition() + ", "
+//                    + holder.getItemId() + ", " + holder.getLayoutPosition() + ", " + holder.noteEditText.getText());
+
+            if (selectedNotePosition == holder.getAdapterPosition()) {
+                holder.noteEditText.requestFocus();
+            }
+        }
+    }
+
+    public void setContentView(View contentView) {
+        this.contentView = contentView;
     }
 
     @Override
@@ -243,6 +324,15 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         return notesList.indexOf(note);
     }
 
+    public int getPositionById(int noteId) {
+        for (Note noteFromList : notesList) {
+            if (noteFromList.id == noteId) {
+                return getPosition(noteFromList);
+            }
+        }
+        return -1;
+    }
+
     public void filter(String searchRequest) {
         notesList.clear();
         if (searchRequest.isEmpty()) {
@@ -292,6 +382,8 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
         if (! currentPriority.equals(priorityInfo.MINOR)) {
             menu.add(0, MAIN_CONTEXT_MENU_ITEM_MAKE_MINOR_ID, 0, titleSetMinorPriority);
         }
+
+        menu.add(0, MAIN_CONTEXT_MENU_ITEM_MOVE_ID, 0, context.getString(R.string.note_context_menu_move));
     }
 
     private void displayTrashContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
@@ -332,14 +424,5 @@ public class NotesListAdapter extends RecyclerView.Adapter<NotesListAdapter.Note
             }});
     }
 
-    private void showListName(View itemView, View listNameTextView) {
-        //View listNameTextView = itemView.findViewById(R.id.note_listname_textview);
-        listNameTextView.setVisibility(View.VISIBLE);
-    }
-
-    private void dontShowListName(View itemView, View listNameTextView) {
-        //View listNameTextView = itemView.findViewById(R.id.note_listname_textview);
-        listNameTextView.setVisibility(View.GONE);
-    }
 
 }

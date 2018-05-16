@@ -47,6 +47,10 @@ public class Note {
         this.modificationTime = System.currentTimeMillis();
     }
 
+    public Note(int id) {  // for moving note to another list
+        this.id = id;
+    }
+
 
     public void printContentToLog() {
         Log.d(LOG_TAG, "id = '" + id + "', priority = '" + priority.name +

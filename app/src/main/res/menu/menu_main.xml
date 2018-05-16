@@ -40,8 +40,13 @@
         android:title="@string/menu_delete_list_title"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_open_trash"
+        android:id="@+id/action_copy_list_to_clipboard"
         android:orderInCategory="102"
+        android:title="@string/menu_copy_list_to_clipboard"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_open_trash"
+        android:orderInCategory="103"
         android:title="@string/menu_open_trash_title"
         app:showAsAction="never"/>
     <!--<item-->

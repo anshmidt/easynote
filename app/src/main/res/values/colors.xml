@@ -9,6 +9,8 @@
     <color name="menuIcons">#ffffffff</color>
     <color name="cursorColorInSearch">#eeeeee</color>
     <color name="notesDividerColor">#ececec</color>
+    <color name="cursorInNote">#00acc1</color>
+    <color name="hintInNote">#e0e0e0</color>
     <color name="minorNotesTextColor">#bbbbbb</color>
-    <color name="importantNotesLabelColor">#D00101</color>
+    <color name="importantNotesLabelColor">#d00101</color>
 </resources>

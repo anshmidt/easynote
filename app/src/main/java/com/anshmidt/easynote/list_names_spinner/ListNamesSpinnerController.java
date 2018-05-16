@@ -73,8 +73,9 @@ public class ListNamesSpinnerController {
         String renamedListName = renamedList.name;
         int position = getPositionInSpinner(currentList);
         listNamesList.set(position, renamedListName);
-
-        initAdapter(listNamesList);
+        setCurrentList(renamedList);
+        //initAdapter(listNamesList);
+        listNamesSpinnerAdapter.notifyDataSetChanged();
     }
 
     public void onListAdded(NotesList newList) {
@@ -103,6 +104,7 @@ public class ListNamesSpinnerController {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(LOG_TAG, "spinner item with position " + position + " selected");
                 if (isAddListItemSelected(position)) {
+                    setSpinnerPosition(listNamesSpinner, currentList);
                     RenameListDialogFragment renameListDialogFragment = new RenameListDialogFragment();
                     FragmentManager manager = ((Activity) context).getFragmentManager();
                     renameListDialogFragment.show(manager, renameListDialogFragment.FRAGMENT_TAG);
@@ -131,11 +133,6 @@ public class ListNamesSpinnerController {
     }
 
 
-
-//    public int getListIdByPosition(int position) {
-//        String selectedListName = listNamesList.get(position);
-//        return databaseHelper.getListIdByName(selectedListName);
-//    }
 
     public NotesList getListByPosition(int position) {
         String selectedListName = listNamesList.get(position);

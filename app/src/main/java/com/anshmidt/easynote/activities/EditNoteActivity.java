@@ -4,10 +4,11 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 
 import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
-import com.anshmidt.easynote.NotesListAdapter;
+import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.R;
 import com.anshmidt.easynote.SimpleDividerItemDecoration;
 
@@ -21,15 +22,15 @@ public class EditNoteActivity extends BaseActivity {
 
     protected ArrayList<Note> notesList;
     protected RecyclerView rv;
-    protected NotesListAdapter adapter;
+    protected NotesAdapter notesAdapter;
 
     public int positionInList;
+    public View contentView;
     private DatabaseHelper databaseHelper;
     private final String LOG_TAG = EditNoteActivity.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         setContentView(R.layout.activity_editnote);
         super.onCreate(savedInstanceState);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -41,11 +42,13 @@ public class EditNoteActivity extends BaseActivity {
         rv.setLayoutManager(llm);
         rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
-//        notesList = databaseHelper.getAllNotes();
         notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList());
-        adapter = new NotesListAdapter(notesList, this);
-        setNotesListAdapter(adapter);
-        rv.setAdapter(adapter);
+        notesAdapter = new NotesAdapter(notesList, this);
+        setNotesAdapter(notesAdapter);
+        rv.setAdapter(notesAdapter);
+
+        contentView = findViewById(R.id.main_layout_editnoteactivity);
+        notesAdapter.setContentView(contentView);
 
         positionInList = getIntent().getIntExtra("itemPosition", 0);
 
@@ -54,7 +57,10 @@ public class EditNoteActivity extends BaseActivity {
             Log.d(LOG_TAG, "searchRequest " + searchRequest + " was found in the intent");
         }
 
-        llm.setStackFromEnd(true);  //to fix issue with 3 last items covered with a keyboard
+        llm.setStackFromEnd(true);  //fixes issue with 3 last items covered with a keyboard
+
+        setItemSwipeCallback(notesAdapter, rv);
+
     }
 
 
@@ -62,7 +68,7 @@ public class EditNoteActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
 
-        adapter.setSelectedNotePosition(positionInList);
+        notesAdapter.setSelectedNotePosition(positionInList);
         //llm.scrollToPositionWithOffset(positionInList, 0);   //also works, but a bit different
         llm.scrollToPosition(positionInList);
 

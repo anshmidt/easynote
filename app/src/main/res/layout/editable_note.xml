@@ -2,8 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/noteBackground"
     >
 
+
+    <!--<com.anshmidt.easynote.MyEditText-->
     <EditText xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/note_edittext"
         android:orientation="vertical"
@@ -16,10 +19,15 @@
         android:textColor="@color/notesTextColor"
         android:textSize="20sp"
         android:background="@color/noteBackground"
-        android:textCursorDrawable="@null"
+        android:textCursorDrawable="@drawable/cursor_editablenote"
+        android:textIsSelectable="true"
         android:inputType="text|textMultiLine|textNoSuggestions|textAutoCorrect"
         >
     </EditText>
+    <!--TextView does not support text selection. Selection cancelled.-->
+
     <!--android:inputType="textMultiLine|textNoSuggestions"-->
+
+
 
 </RelativeLayout>

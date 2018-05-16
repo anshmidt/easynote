@@ -10,10 +10,12 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.anshmidt.easynote.KeyboardHelper;
 import com.anshmidt.easynote.R;
+import com.anshmidt.easynote.activities.MainActivity;
 
 /**
  * Created by Ilya Anshmidt on 17.02.2018.
@@ -37,6 +39,13 @@ public class RenameListDialogFragment extends DialogFragment {
     Mode mode;
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+    
+
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final LayoutInflater inflater = LayoutInflater.from(getActivity());
         View subView = inflater.inflate(R.layout.dialog_rename_list, null);
@@ -57,7 +66,10 @@ public class RenameListDialogFragment extends DialogFragment {
 
         renameListEditText.setText(currentListName);
         keyboardHelper.moveCursorToEnd(renameListEditText);
-        keyboardHelper.showKeyboard(renameListEditText);
+//        if (getActivity() instanceof MainActivity) {
+//            keyboardHelper.showKeyboard(renameListEditText);
+//        }
+
 
 
         builder.setPositiveButton(R.string.rename_list_dialog_ok_button, new DialogInterface.OnClickListener() {
@@ -72,7 +84,10 @@ public class RenameListDialogFragment extends DialogFragment {
                     } else {
                         activity.onListAdded(listName);
                     }
-                    keyboardHelper.hideKeyboard(renameListEditText);
+
+                    if (getActivity() instanceof MainActivity) {
+                        keyboardHelper.hideKeyboard(renameListEditText);
+                    }
                 }
 
             }
@@ -81,11 +96,15 @@ public class RenameListDialogFragment extends DialogFragment {
         builder.setNegativeButton(R.string.rename_list_dialog_cancel_button, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                keyboardHelper.hideKeyboard(renameListEditText);
+                if (getActivity() instanceof MainActivity) {
+                    keyboardHelper.hideKeyboard(renameListEditText);
+                }
             }
         });
 
         final AlertDialog dialog = builder.create();
+
+
 
         renameListEditText.addTextChangedListener(new TextWatcher() {
             @Override

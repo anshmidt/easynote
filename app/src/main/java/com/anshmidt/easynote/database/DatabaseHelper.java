@@ -78,8 +78,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         priorityDao.fillWithDefaultData(db, context);
     }
 
-    public void addNote(Note note) {
-        notesDao.addNote(note);
+    public int addNote(Note note) {
+        return notesDao.addNote(note);
     }
 
     public void addList(NotesList notesList) {
@@ -118,6 +118,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         listsDao.moveListToTrash(list);
     }
 
+    public void moveNoteToAnotherList(Note noteToMove, NotesList destinationList) {
+        notesDao.moveNoteToAnotherList(noteToMove, destinationList);
+    }
+
     public void moveAllNotesFromListToTrash(NotesList list) {
         ArrayList<Note> allNotesFromList = getAllNotesFromList(list);
         for (int i = 0; i<allNotesFromList.size(); i++) {
@@ -137,9 +141,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notesDao.deleteEmptyNotesFromList(list);
     }
 
+    public void deleteTrashNotes() {
+        notesDao.deleteTrashNotes();
+    }
+
+    public void deleteTrashLists() {
+        listsDao.deleteTrashLists();
+    }
+
     public List<String> getAllListNames() {
         return listsDao.getAllListNamesNotFromTrash();
     }
+
+
 
     public String getListNameById(int listId) {
         return listsDao.getListById(listId).name;
