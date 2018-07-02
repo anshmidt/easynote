@@ -51,8 +51,8 @@ public class NotesDao implements TableHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db) {
-        drop(db);
-        onCreate(db);
+//        drop(db);
+//        onCreate(db);
     }
 
     @Override

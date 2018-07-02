@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,6 +57,7 @@ public abstract class BaseActivity extends AppCompatActivity
     ImageView clearSearchButton;
     EditText searchField;
     String searchRequest;
+    FloatingActionButton addNoteButton;
     Toolbar toolbar;
     Spinner listNamesSpinner;
     ListNamesSpinnerController listNamesSpinnerController;
@@ -81,6 +83,27 @@ public abstract class BaseActivity extends AppCompatActivity
         listNamesSpinnerController = new ListNamesSpinnerController(listNamesSpinner, BaseActivity.this);
         listNamesSpinnerController.init(databaseHelper.getAllListNames());
         listNamesSpinnerController.setListSelectedListener(this);
+
+        addNoteButton = (FloatingActionButton) findViewById(R.id.add_note_button);
+        addNoteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
+
+                int newNotePosition = getNotesAdapter().whereToAddNewNote();
+                if (BaseActivity.this instanceof MainActivity) {
+                    openEditNoteActivity(newNotePosition);
+                }
+                Note newNote = new Note("", BaseActivity.this);
+                newNote.list = listNamesSpinnerController.getCurrentList();
+                newNote.id = databaseHelper.addNote(newNote);
+
+                notesAdapter.add(newNotePosition, newNote);
+                rv = (RecyclerView)findViewById(R.id.recyclerView);
+                rv.getLayoutManager().scrollToPosition(newNotePosition);
+                notesAdapter.setSelectedNotePosition(newNotePosition);
+            }
+        });
     }
 
 
@@ -184,23 +207,23 @@ public abstract class BaseActivity extends AppCompatActivity
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.action_add: {
-                //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
-
-                int newNotePosition = getNotesAdapter().whereToAddNewNote();
-                if (this instanceof MainActivity) {
-                    openEditNoteActivity(newNotePosition);
-                }
-                Note newNote = new Note("", BaseActivity.this);
-                newNote.list = listNamesSpinnerController.getCurrentList();
-                newNote.id = databaseHelper.addNote(newNote);
-
-                notesAdapter.add(newNotePosition, newNote);
-                rv = (RecyclerView)findViewById(R.id.recyclerView);
-                rv.getLayoutManager().scrollToPosition(newNotePosition);
-                notesAdapter.setSelectedNotePosition(newNotePosition);
-                break;
-            }
+//            case R.id.action_add: {
+//                //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
+//
+//                int newNotePosition = getNotesAdapter().whereToAddNewNote();
+//                if (this instanceof MainActivity) {
+//                    openEditNoteActivity(newNotePosition);
+//                }
+//                Note newNote = new Note("", BaseActivity.this);
+//                newNote.list = listNamesSpinnerController.getCurrentList();
+//                newNote.id = databaseHelper.addNote(newNote);
+//
+//                notesAdapter.add(newNotePosition, newNote);
+//                rv = (RecyclerView)findViewById(R.id.recyclerView);
+//                rv.getLayoutManager().scrollToPosition(newNotePosition);
+//                notesAdapter.setSelectedNotePosition(newNotePosition);
+//                break;
+//            }
             case R.id.action_rename_list: {
                 RenameListDialogFragment renameListDialogFragment = new RenameListDialogFragment();
                 Bundle currentListBundle = new Bundle();
