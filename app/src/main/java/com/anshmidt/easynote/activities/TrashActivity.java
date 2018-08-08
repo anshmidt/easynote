@@ -15,7 +15,6 @@ import android.widget.ImageView;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.R;
-import com.anshmidt.easynote.SimpleDividerItemDecoration;
 import com.anshmidt.easynote.database.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ public class TrashActivity extends AppCompatActivity {
         rv = (RecyclerView)findViewById(R.id.recyclerView);
         llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
-        rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
         notesList = databaseHelper.getAllNotesFromTrash();
         notesAdapter = new NotesAdapter(notesList, this);

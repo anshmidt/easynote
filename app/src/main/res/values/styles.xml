@@ -15,6 +15,17 @@
         <item name="android:textColorPrimary">@color/menuIcons</item>
     </style>
 
+    <style name="NoteCardViewStyle" parent="Theme.AppCompat.Light">
+
+        <item name="cardCornerRadius">8dp</item>
+        <item name="cardElevation">1dp</item>
+        <item name="contentPaddingBottom">5dp</item>
+        <item name="contentPaddingTop">5dp</item>
+        <item name="contentPaddingLeft">5dp</item>
+        <item name="contentPaddingRight">5dp</item>
+        <item name="cardBackgroundColor">@color/noteBackground</item>
+    </style>
+
 
     <!--For cursor_searchview in SearchView-->
     <style name="cursorInSearchViewColor" parent="Widget.AppCompat.AutoCompleteTextView">

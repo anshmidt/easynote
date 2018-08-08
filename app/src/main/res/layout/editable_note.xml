@@ -1,33 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<android.support.v7.widget.CardView
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/noteBackground"
-    >
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp"
+    android:layout_marginTop="3dp"
+    android:layout_marginBottom="3dp"
+    style="@style/NoteCardViewStyle">
 
-
-    <!--<com.anshmidt.easynote.MyEditText-->
-    <EditText xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/note_edittext"
-        android:orientation="vertical"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:textColor="@color/notesTextColor"
-        android:textSize="20sp"
         android:background="@color/noteBackground"
-        android:textCursorDrawable="@drawable/cursor_editablenote"
-        android:textIsSelectable="true"
-        android:inputType="text|textMultiLine|textNoSuggestions|textAutoCorrect"
         >
-    </EditText>
-    <!--TextView does not support text selection. Selection cancelled.-->
-
-    <!--android:inputType="textMultiLine|textNoSuggestions"-->
 
 
+        <!--<com.anshmidt.easynote.MyEditText-->
+        <EditText xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/note_edittext"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textColor="@color/notesTextColor"
+            android:textSize="20sp"
+            android:background="@color/noteBackground"
+            android:textCursorDrawable="@drawable/cursor_editablenote"
+            android:textIsSelectable="true"
+            android:inputType="text|textMultiLine|textNoSuggestions|textAutoCorrect"
+            >
+        </EditText>
+        <!--TextView does not support text selection. Selection cancelled.-->
 
-</RelativeLayout>
+        <!--android:inputType="textMultiLine|textNoSuggestions"-->
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>

@@ -14,7 +14,7 @@ import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.PriorityInfo;
 import com.anshmidt.easynote.R;
-import com.anshmidt.easynote.SimpleDividerItemDecoration;
+
 import com.anshmidt.easynote.dialogs.MoveNoteDialogFragment;
 
 import java.util.ArrayList;
@@ -51,7 +51,6 @@ public class MainActivity extends BaseActivity
         rv = (RecyclerView)findViewById(R.id.recyclerView);
         llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
-        rv.addItemDecoration(new SimpleDividerItemDecoration(this));
 
 
         notesAdapter = new NotesAdapter(notesList, this);
