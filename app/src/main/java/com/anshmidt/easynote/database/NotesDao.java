@@ -214,7 +214,56 @@ public class NotesDao implements TableHelper {
 
         Cursor cursor = db.rawQuery(selectAllNotesQuery, null);
         return readNotesWithCursor(cursor);
+    }
 
+//    public ArrayList<Note> getSearchResultsFromAllLists(String searchRequest) {
+//        String selectNotesBySearchRequestQuery = "SELECT "
+//                + KEY_NOTE_ID + ", "
+//                + KEY_MODIFIED_AT + ", "
+//                + KEY_TEXT + ", "
+//                + NOTES_TABLE_NAME + "." + KEY_IN_TRASH + ", "
+//                + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + ", "
+//                + PriorityDao.PRIORITY_TABLE_NAME + "." + PriorityDao.KEY_PRIORITY_NAME + ", "
+//                + NOTES_TABLE_NAME + "." + KEY_LIST_ID + ", "
+//                + ListsDao.LISTS_TABLE_NAME + "." + ListsDao.KEY_LIST_NAME
+//                + " FROM " + NOTES_TABLE_NAME
+//                + " LEFT OUTER JOIN " + ListsDao.LISTS_TABLE_NAME
+//                + " ON " + NOTES_TABLE_NAME + "." + KEY_LIST_ID + " = " + ListsDao.LISTS_TABLE_NAME + "." + KEY_LIST_ID
+//                + " LEFT OUTER JOIN " + PriorityDao.PRIORITY_TABLE_NAME
+//                + " ON " + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " = " + PriorityDao.PRIORITY_TABLE_NAME + "." + KEY_PRIORITY_ID
+//                + " WHERE " + NOTES_TABLE_NAME + "." + KEY_TEXT + " LIKE '%" + searchRequest + "%'"
+//                + " AND " + NOTES_TABLE_NAME + "." + KEY_IN_TRASH + " = " + IN_TRASH_FALSE
+//                + " ORDER BY "
+//                + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " ASC, "
+//                + KEY_MODIFIED_AT + " DESC";
+//
+//        Cursor cursor = db.rawQuery(selectNotesBySearchRequestQuery, null);
+//        return readNotesWithCursor(cursor);
+//    }
+
+    public ArrayList<Note> getSearchResults(String searchRequest, boolean fromTrash) {
+        String selectNotesBySearchRequestQuery = "SELECT "
+                + KEY_NOTE_ID + ", "
+                + KEY_MODIFIED_AT + ", "
+                + KEY_TEXT + ", "
+                + NOTES_TABLE_NAME + "." + KEY_IN_TRASH + ", "
+                + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + ", "
+                + PriorityDao.PRIORITY_TABLE_NAME + "." + PriorityDao.KEY_PRIORITY_NAME + ", "
+                + NOTES_TABLE_NAME + "." + KEY_LIST_ID + ", "
+                + ListsDao.LISTS_TABLE_NAME + "." + ListsDao.KEY_LIST_NAME
+                + " FROM " + NOTES_TABLE_NAME
+                + " LEFT OUTER JOIN " + ListsDao.LISTS_TABLE_NAME
+                + " ON " + NOTES_TABLE_NAME + "." + KEY_LIST_ID + " = " + ListsDao.LISTS_TABLE_NAME + "." + KEY_LIST_ID
+                + " LEFT OUTER JOIN " + PriorityDao.PRIORITY_TABLE_NAME
+                + " ON " + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " = " + PriorityDao.PRIORITY_TABLE_NAME + "." + KEY_PRIORITY_ID
+                + " WHERE " + NOTES_TABLE_NAME + "." + KEY_TEXT + " LIKE '%" + searchRequest + "%'"
+                + " AND " + NOTES_TABLE_NAME + "." + KEY_IN_TRASH + " = " + boolToNumeralString(fromTrash)
+                + " ORDER BY "
+                + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " ASC, "
+                + KEY_MODIFIED_AT + " DESC";
+
+        Cursor cursor = db.rawQuery(selectNotesBySearchRequestQuery, null);
+        return readNotesWithCursor(cursor);
     }
 
     public ArrayList<Note> getAllNotesFromTrash() {
@@ -367,6 +416,11 @@ public class NotesDao implements TableHelper {
     public void deleteAllEmptyNotes() {
         db.delete(NOTES_TABLE_NAME, "trim(" + KEY_TEXT + ")=''", null);
         Log.d(LOG_TAG, "All empty notes deleted");
+    }
+
+    private String boolToNumeralString(final boolean input) {
+        int resultInt = input ? 1 : 0;
+        return String.valueOf(resultInt);
     }
 
 

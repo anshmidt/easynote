@@ -102,6 +102,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return notesDao.getAllNotesFromTrash();
     }
 
+    public ArrayList<Note> getSearchResultsFromAllLists(String searchRequest) {  //excluding Trash
+        return notesDao.getSearchResults(searchRequest, false);
+    }
+
+    public ArrayList<Note> getSearchResultsFromTrash(String searchRequest) {
+        return notesDao.getSearchResults(searchRequest, true);
+    }
+
     public void printAllNotes() {
         notesDao.getAllNotes();
     }

@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.R;
+import com.anshmidt.easynote.SearchController;
 import com.anshmidt.easynote.database.DatabaseHelper;
 
 import java.util.ArrayList;
@@ -36,10 +37,12 @@ public class TrashActivity extends AppCompatActivity {
     Toolbar toolbar;
     protected NotesAdapter notesAdapter;
     protected ArrayList<Note> notesList;
+    public SearchController searchController;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        searchController = new SearchController();
         setContentView(R.layout.activity_trash);
         databaseHelper = DatabaseHelper.getInstance(TrashActivity.this);
         toolbar = (Toolbar) findViewById(R.id.toolbar_trash);
@@ -61,6 +64,12 @@ public class TrashActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_trash, menu);
+        searchController = new SearchController();
+        searchController.setNotesAdapter(notesAdapter);
+        searchController.setMenu(menu);
+        searchController.setTextListener();
+        searchController.setOnClickClearButtonListener();
+        searchController.displayResultsIfNeeded();
         return true;
     }
 

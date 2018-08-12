@@ -5,10 +5,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,13 +19,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.NotesFormatter;
+import com.anshmidt.easynote.SearchController;
 import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
 import com.anshmidt.easynote.list_names_spinner.ListNamesSpinnerController;
 import com.anshmidt.easynote.NotesList;
@@ -38,7 +35,6 @@ import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
@@ -47,7 +43,8 @@ import java.util.ArrayList;
 public abstract class BaseActivity extends AppCompatActivity
         implements RenameListDialogFragment.RenameListDialogListener,
         ListNamesSpinnerController.ListSelectedListener,
-        ConfirmationDialogFragment.ConfirmationDialogListener
+        ConfirmationDialogFragment.ConfirmationDialogListener,
+        SearchController.OnSearchViewExpandListener
 {
 
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
@@ -55,14 +52,18 @@ public abstract class BaseActivity extends AppCompatActivity
     protected LinearLayoutManager llm;
     private NotesAdapter notesAdapter;
     private DatabaseHelper databaseHelper;
-    SearchView searchView;
-    ImageView clearSearchButton;
-    EditText searchField;
-    String searchRequest;
+    public final static String KEY_INTENT_SEARCH_REQUEST = "searchRequest";
+    public final static String KEY_INTENT_ITEM_POSITION = "itemPosition";
+//    public SearchView searchView;
+//    private boolean searchViewIconified = true;
+//    ImageView clearSearchButton;
+//    EditText searchField;
+//    public String searchRequest = "";
     FloatingActionButton addNoteButton;
     Toolbar toolbar;
     Spinner listNamesSpinner;
     ListNamesSpinnerController listNamesSpinnerController;
+    public SearchController searchController;
 
     SharedPreferencesHelper sharPrefHelper;
     protected Toast movedToTrashToast = null;
@@ -74,6 +75,7 @@ public abstract class BaseActivity extends AppCompatActivity
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        searchController = new SearchController();
         databaseHelper = DatabaseHelper.getInstance(BaseActivity.this);
         sharPrefHelper = new SharedPreferencesHelper(BaseActivity.this);
         toolbar = (Toolbar) findViewById(R.id.toolbar_main);
@@ -90,22 +92,29 @@ public abstract class BaseActivity extends AppCompatActivity
         addNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
+                onAddNoteButtonClicked();
 
-                int newNotePosition = getNotesAdapter().whereToAddNewNote();
-                if (BaseActivity.this instanceof MainActivity) {
-                    openEditNoteActivity(newNotePosition);
-                }
-                Note newNote = new Note("", BaseActivity.this);
-                newNote.list = listNamesSpinnerController.getCurrentList();
-                newNote.id = databaseHelper.addNote(newNote);
-
-                notesAdapter.add(newNotePosition, newNote);
-                rv = (RecyclerView)findViewById(R.id.recyclerView);
-                rv.getLayoutManager().scrollToPosition(newNotePosition);
-                notesAdapter.setSelectedNotePosition(newNotePosition);
             }
         });
+
+        rv = (RecyclerView)findViewById(R.id.recyclerView);
+
+
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener(){
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy){
+                if (dy < 0 && !addNoteButton.isShown() && searchController.isSearchViewIconified())
+                    addNoteButton.show();
+                else if (dy > 0 && addNoteButton.isShown())
+                    addNoteButton.hide();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
+
     }
 
 
@@ -128,41 +137,68 @@ public abstract class BaseActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(final Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        expandSearchViewToWholeBar(searchView, menu);
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String searchRequest) {
-                notesAdapter.filter(searchRequest);
-                setSearchRequest(searchRequest);
-                return false;
-            }
+        searchController.setMenu(menu);
+        searchController.setNotesAdapter(notesAdapter);
+        searchController.setOnSearchViewExpandListener(this);
+        searchController.setTextListener();
+        searchController.setOnClickClearButtonListener();
 
-            @Override
-            public boolean onQueryTextChange(String searchRequest) {
-                if (! searchRequest.equals("")) {
-                    notesAdapter.filter(searchRequest);
-                }
-                setSearchRequest(searchRequest);
-                return false;
-            }
-        });
+//        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+//        expandSearchViewToWholeBar(searchView, menu);
+//
+//        searchViewIconified = searchView.isIconified();
+//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String searchRequest) {
+//                notesAdapter.searchRequest = searchRequest;
+//                notesAdapter.filter(searchRequest, searchViewIconified);
+////                setSearchRequest(searchRequest);
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String searchRequest) {
+//                notesAdapter.searchRequest = searchRequest;
+//                notesAdapter.filter(searchRequest, searchViewIconified);
+////                if (! searchRequest.equals("")) {
+////                    notesAdapter.filter(searchRequest);
+////                }
+////                setSearchRequest(searchRequest);
+//                return false;
+//            }
+//        });
 
-        clearSearchButton = (ImageView) searchView.findViewById(R.id.search_close_btn);
-        clearSearchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                notesAdapter.resetFilter();
-                searchField = (EditText) findViewById(R.id.search_src_text);
-                searchField.setText("");
-            }
-        });
+//        clearSearchButton = (ImageView) searchView.findViewById(R.id.search_close_btn);
+//        clearSearchButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+////                notesAdapter.resetFilter();
+//                notesAdapter.searchRequest = "";
+//                notesAdapter.filterForEmptySearchRequest(searchViewIconified);
+//                searchField = (EditText) findViewById(R.id.search_src_text);
+//                searchField.setText("");
+////                setSearchRequest("");
+//            }
+//        });
 
-        if (searchRequest != null) {
-            Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + searchRequest);
-            notesAdapter.filter(searchRequest);
+        String searchRequestFromIntent = getIntent().getStringExtra(KEY_INTENT_SEARCH_REQUEST);
+        if ((searchRequestFromIntent != null) && (! searchRequestFromIntent.isEmpty())) {
+            searchController.onReceivedIntentWithSearchRequest(searchRequestFromIntent);
+//            notesAdapter.searchRequest = searchRequestFromIntent;
+//            MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+//            MenuItemCompat.expandActionView(searchMenuItem);
+//            searchField = (EditText) findViewById(R.id.search_src_text);
+//            searchField.setText(searchRequestFromIntent);
+//            searchViewIconified = false;
         }
+
+        searchController.displayResultsIfNeeded();
+
+//        if (notesAdapter.searchRequest != null) {
+//            Log.d(LOG_TAG, "onCreateMenu: searchRequest: " + notesAdapter.searchRequest);
+//            notesAdapter.filter(notesAdapter.searchRequest, searchViewIconified);
+//        }
 
         return true;
     }
@@ -170,39 +206,53 @@ public abstract class BaseActivity extends AppCompatActivity
     @Override
     public void onListSelected() {
         NotesList currentList = listNamesSpinnerController.getCurrentList();
-        ArrayList<Note> notes = databaseHelper.getAllNotesFromList(currentList);
-        notesAdapter.notesList = notes;
+        notesAdapter.notesList = databaseHelper.getAllNotesFromList(currentList);
         notesAdapter.notifyDataSetChanged();
 
     }
 
-
-    protected void expandSearchViewToWholeBar(final SearchView searchView, final Menu menu) {
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-
-        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                setItemsVisibility(menu, searchItem, true);
-                notesAdapter.resetFilter();
-                return true;
-            }
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                setItemsVisibility(menu, searchItem, false);
-                return true;
-            }
-        });
+    @Override
+    public void onSearchViewCollapsed() {
+        onListSelected();
+        addNoteButton.show();
     }
 
-    protected void setItemsVisibility(Menu menu, MenuItem exception, boolean visible) {
-        for (int i=0; i<menu.size(); ++i) {
-            MenuItem item = menu.getItem(i);
-            if (item != exception) {
-                item.setVisible(visible);
-            }
-        }
+    @Override
+    public void onSearchViewExpanded() {
+        addNoteButton.hide();
     }
+
+//    protected void expandSearchViewToWholeBar(final SearchView searchView, final Menu menu) {
+//        final MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+//
+//        MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+//            @Override
+//            public boolean onMenuItemActionCollapse(MenuItem item) {
+//                setMenuItemsVisibility(menu, searchMenuItem, true);
+//                notesAdapter.searchRequest = "";
+//                onListSelected();
+//                searchViewIconified = true;
+//                addNoteButton.show();
+//                return true;
+//            }
+//            @Override
+//            public boolean onMenuItemActionExpand(MenuItem item) {
+//                setMenuItemsVisibility(menu, searchMenuItem, false);
+//                searchViewIconified = false;
+//                addNoteButton.hide();
+//                return true;
+//            }
+//        });
+//    }
+
+//    protected void setMenuItemsVisibility(Menu menu, MenuItem exception, boolean visible) {
+//        for (int i=0; i<menu.size(); ++i) {
+//            MenuItem item = menu.getItem(i);
+//            if (item != exception) {
+//                item.setVisible(visible);
+//            }
+//        }
+//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -287,17 +337,17 @@ public abstract class BaseActivity extends AppCompatActivity
 
     public void openEditNoteActivity(final int itemPosition) {
         Intent intent = new Intent(this, EditNoteActivity.class);
-        intent.putExtra("itemPosition", itemPosition);
-        if (searchRequest != null) {
-            intent.putExtra("searchRequest", searchRequest);
+        intent.putExtra(KEY_INTENT_ITEM_POSITION, itemPosition);
+        if (searchController.searchRequest != null) {
+            intent.putExtra(KEY_INTENT_SEARCH_REQUEST, searchController.searchRequest);
         }
         startActivity(intent);
     }
 
 
-    public void setSearchRequest(String request) {
-        this.searchRequest = request;
-    }
+//    public void setSearchRequest(String request) {
+//        this.searchRequest = request;
+//    }
 
     protected NotesAdapter getNotesAdapter() {
         return notesAdapter;
@@ -312,6 +362,7 @@ public abstract class BaseActivity extends AppCompatActivity
         int currentListId = listNamesSpinnerController.getCurrentList().id;
         NotesList renamedList = new NotesList(currentListId, listName);
         listNamesSpinnerController.onListRenamed(renamedList);
+
         databaseHelper.updateList(renamedList);
     }
 
@@ -320,6 +371,8 @@ public abstract class BaseActivity extends AppCompatActivity
         NotesList newList = new NotesList(listName);
         listNamesSpinnerController.onListAdded(newList);
         listNamesSpinnerController.setSpinnerPosition(listNamesSpinner, newList);
+        onAddNoteButtonClicked(); //adding a first note to the list
+        notesAdapter.notifyDataSetChanged();
         databaseHelper.addList(newList);
     }
 
@@ -358,5 +411,21 @@ public abstract class BaseActivity extends AppCompatActivity
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(rv);
+    }
+
+    public void onAddNoteButtonClicked() {
+        //user is allowed to add more than 1 empty note, but they will be deleted when switching to MainActivity
+        int newNotePosition = getNotesAdapter().whereToAddNewNote();
+        if (BaseActivity.this instanceof MainActivity) {
+            openEditNoteActivity(newNotePosition);
+        }
+        Note newNote = new Note("", BaseActivity.this);
+        newNote.list = listNamesSpinnerController.getCurrentList();
+        newNote.id = databaseHelper.addNote(newNote);
+
+        notesAdapter.add(newNotePosition, newNote);
+        rv = (RecyclerView)findViewById(R.id.recyclerView);
+        rv.getLayoutManager().scrollToPosition(newNotePosition);
+        notesAdapter.setSelectedNotePosition(newNotePosition);
     }
 }

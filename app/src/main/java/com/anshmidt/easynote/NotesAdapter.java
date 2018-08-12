@@ -8,6 +8,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,6 +21,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.anshmidt.easynote.activities.BaseActivity;
 import com.anshmidt.easynote.activities.EditNoteActivity;
 import com.anshmidt.easynote.activities.MainActivity;
 import com.anshmidt.easynote.activities.TrashActivity;
@@ -37,11 +39,12 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     private NoteDecorator noteDecorator;
     private PriorityInfo priorityInfo;
     public ArrayList<Note> notesList;
-    private ArrayList<Note> searchResultsList = new ArrayList<>();  //for search results
+//    public String searchRequest = "";
+//    private ArrayList<Note> searchResultsList = new ArrayList<>();  //for search results
     private int selectedNotePosition = -1;
     public int longPressedNotePosition = -1;
     private final String LOG_TAG = NotesAdapter.class.getSimpleName();
-    private boolean justCreated = true;
+//    private boolean justCreated = true;
 
 
     public final int MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID = 1;
@@ -62,6 +65,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
             super(itemView);
 //            this.itemView = (TextView) itemView;
             listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
+            setListNamesVisibility(listNameTextView);
+            setNoteTextViewsVisibility(itemView);
             if (context instanceof EditNoteActivity) {
                 imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                 noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
@@ -90,10 +95,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     }
                 });
 
-
             } else if (context instanceof MainActivity) {
                 noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
-                listNameTextView.setVisibility(View.GONE);
+
                 itemView.setOnClickListener(this);
 
                 itemView.setOnCreateContextMenuListener(this);
@@ -106,7 +110,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                 });
             } else if (context instanceof TrashActivity) {
                 noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
-                listNameTextView.setVisibility(View.VISIBLE);
 
                 itemView.setOnClickListener(this);
                 itemView.setOnCreateContextMenuListener(this);
@@ -119,15 +122,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                 });
             }
 
-//            itemView.setOnClickListener(this);
-//            itemView.setOnCreateContextMenuListener(this);
-//            itemView.setOnLongClickListener(new View.OnLongClickListener() {
-//                @Override
-//                public boolean onLongClick(View v) {
-//                    longPressedNotePosition = getAdapterPosition();
-//                    return false;
-//                }
-//            });
         }
 
         @Override
@@ -186,7 +180,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     public NotesAdapter(ArrayList<Note> notesList, Context context){
         this.notesList = notesList;
         this.context = context;
-        this.searchResultsList.addAll(notesList);
+//        this.searchResultsList.addAll(notesList);
         databaseHelper = DatabaseHelper.getInstance(this.context);
         noteDecorator = new NoteDecorator(context);
         priorityInfo = new PriorityInfo(context);
@@ -196,7 +190,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     public NoteViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)  {
         View view;
         if (context instanceof EditNoteActivity){
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.editable_note, viewGroup, false);
+//            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.editable_note, viewGroup, false);
+            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
         } else {
             view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
         }
@@ -207,6 +202,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     @Override
     public void onBindViewHolder(final NoteViewHolder noteViewHolder, final int i) {
         TextView noteView;
+        TextView listNameTextView;
 
         if (context instanceof EditNoteActivity) {
             noteView = noteViewHolder.noteEditText;
@@ -215,6 +211,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         }
         noteView.setText(notesList.get(i).text);
 
+        listNameTextView = noteViewHolder.listNameTextView;
+        setListNamesVisibility(listNameTextView);
+
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
 
@@ -222,13 +221,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
             if (selectedNotePosition == i) {
                 EditText noteEditText = (EditText) noteView;
-
-//                noteEditText.requestFocus();
-//                InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);
-
-
-//                noteEditText.requestFocus();
                 noteEditText.setSelection(noteEditText.getText().length()); //move cursor_searchview to the end of the note
 
                 //new
@@ -333,26 +325,29 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         return -1;
     }
 
-    public void filter(String searchRequest) {
-        notesList.clear();
-        if (searchRequest.isEmpty()) {
-            notesList.addAll(searchResultsList);
-        } else {
-            searchRequest = searchRequest.toLowerCase();
-            for (Note item: searchResultsList){
-                if (item.text.toLowerCase().contains(searchRequest)){
-                    notesList.add(item);
+    public void filter(String searchRequest, boolean isSearchViewIconified) {  //isSearchViewIconified = is it collapsed
+        if (! isSearchViewIconified) {
+            notesList.clear();
+            if (!searchRequest.isEmpty()) {
+                if (context instanceof TrashActivity) {
+                    notesList = databaseHelper.getSearchResultsFromTrash(searchRequest);
+                } else {
+                    notesList = databaseHelper.getSearchResultsFromAllLists(searchRequest);
                 }
             }
+            notifyDataSetChanged();
         }
-        notifyDataSetChanged();
     }
 
-    public void resetFilter() {
-        notesList.clear();
-        notesList.addAll(searchResultsList);
-        notifyDataSetChanged();
+    public void filterForEmptySearchRequest(boolean isSearchViewIconified) {
+        filter("", isSearchViewIconified);
     }
+
+//    public void resetFilter() {
+//        notesList.clear();
+////        notesList.addAll(searchResultsList);
+//        notifyDataSetChanged();
+//    }
 
     public String getNoteText(int position) {
         return notesList.get(position).text;
@@ -419,9 +414,39 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                 Long modTime1 = note1.modificationTime;
                 Long modTime2 = note2.modificationTime;
 
-//                return modTime1.compareTo(modTime2);
                 return modTime2.compareTo(modTime1);
             }});
+    }
+
+    public void setListNamesVisibility(TextView listNameTextView) {
+        if (context instanceof TrashActivity) {
+            listNameTextView.setVisibility(View.VISIBLE);
+        } else {
+//            SearchView searchView = ((BaseActivity) context).searchView;
+            SearchController searchController = ((BaseActivity) context).searchController;
+            if (listNameTextView == null) {
+                Log.d(LOG_TAG, "listNameTextView == null");
+                return;
+            }
+//            if (searchView == null || searchView.isIconified()) {
+            if (searchController == null || searchController.isSearchViewNull() || searchController.isSearchViewIconified()) {
+                listNameTextView.setVisibility(View.GONE);
+            } else {
+                listNameTextView.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    public void setNoteTextViewsVisibility(View itemView) {
+        EditText noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
+        TextView noteTextView = (TextView) itemView.findViewById(R.id.note_textview);
+        if (context instanceof EditNoteActivity) {
+            noteEditText.setVisibility(View.VISIBLE);
+            noteTextView.setVisibility(View.GONE);
+        } else {
+            noteEditText.setVisibility(View.GONE);
+            noteTextView.setVisibility(View.VISIBLE);
+        }
     }
 
 

@@ -46,15 +46,17 @@ public class EditNoteActivity extends BaseActivity {
         setNotesAdapter(notesAdapter);
         rv.setAdapter(notesAdapter);
 
+        positionInList = getIntent().getIntExtra(KEY_INTENT_ITEM_POSITION, 0);
+        searchController.searchRequest = getIntent().getStringExtra(KEY_INTENT_SEARCH_REQUEST); //or null if it's not in intent
+        if (searchController.searchRequest != null) {
+            Log.d(LOG_TAG, "searchRequest '" + searchController.searchRequest + "' was found in the intent");
+//            if (! notesAdapter.searchRequest.isEmpty()) {
+//                searchView.onActionViewExpanded();
+//            }
+        }
+
         contentView = findViewById(R.id.main_layout_editnoteactivity);
         notesAdapter.setContentView(contentView);
-
-        positionInList = getIntent().getIntExtra("itemPosition", 0);
-
-        searchRequest = getIntent().getStringExtra("searchRequest"); //or null if it's not in intent
-        if (searchRequest != null) {
-            Log.d(LOG_TAG, "searchRequest " + searchRequest + " was found in the intent");
-        }
 
         llm.setStackFromEnd(true);  //fixes issue with 3 last items covered with a keyboard
 
