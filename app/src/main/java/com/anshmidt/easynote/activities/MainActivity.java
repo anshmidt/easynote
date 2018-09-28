@@ -112,5 +112,7 @@ public class MainActivity extends BaseActivity
 
         databaseHelper.moveNoteToAnotherList(movedNote, new NotesList(chosenListId));
     }
+
+
 }
 

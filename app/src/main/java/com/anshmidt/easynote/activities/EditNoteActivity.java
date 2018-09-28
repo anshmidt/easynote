@@ -1,11 +1,14 @@
 package com.anshmidt.easynote.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
+import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesAdapter;
@@ -33,6 +36,8 @@ public class EditNoteActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         setContentView(R.layout.activity_editnote);
         super.onCreate(savedInstanceState);
+
+        overridePendingTransition(0, 0);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -76,6 +81,11 @@ public class EditNoteActivity extends BaseActivity {
     }
 
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(0, 0);
+    }
 
 
 }

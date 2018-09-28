@@ -22,6 +22,7 @@ import android.view.ViewConfiguration;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.NotesFormatter;
 import com.anshmidt.easynote.SearchController;
@@ -103,10 +104,12 @@ public abstract class BaseActivity extends AppCompatActivity
         rv.addOnScrollListener(new RecyclerView.OnScrollListener(){
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy){
-                if (dy < 0 && !addNoteButton.isShown() && searchController.isSearchViewIconified())
+                if (dy < 0 && !addNoteButton.isShown() && searchController.isSearchViewIconified()) {
                     addNoteButton.show();
-                else if (dy > 0 && addNoteButton.isShown())
+                }
+                else if (dy > 0 && addNoteButton.isShown()) {
                     addNoteButton.hide();
+                }
             }
 
             @Override
@@ -208,7 +211,9 @@ public abstract class BaseActivity extends AppCompatActivity
         NotesList currentList = listNamesSpinnerController.getCurrentList();
         notesAdapter.notesList = databaseHelper.getAllNotesFromList(currentList);
         notesAdapter.notifyDataSetChanged();
-
+        if (!addNoteButton.isShown()) {
+            addNoteButton.show();
+        }
     }
 
     @Override
@@ -427,5 +432,23 @@ public abstract class BaseActivity extends AppCompatActivity
         rv = (RecyclerView)findViewById(R.id.recyclerView);
         rv.getLayoutManager().scrollToPosition(newNotePosition);
         notesAdapter.setSelectedNotePosition(newNotePosition);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        EasyNoteApplication application = (EasyNoteApplication) this.getApplication();
+        if (application.wasInBackground) {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+        }
+        application.stopActivityTransitionTimer();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
     }
 }

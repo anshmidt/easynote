@@ -44,6 +44,7 @@ public class TrashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         searchController = new SearchController();
         setContentView(R.layout.activity_trash);
+        overridePendingTransition(R.anim.slide_in, R.anim.slide_out);
         databaseHelper = DatabaseHelper.getInstance(TrashActivity.this);
         toolbar = (Toolbar) findViewById(R.id.toolbar_trash);
         setSupportActionBar(toolbar);
@@ -122,5 +123,11 @@ public class TrashActivity extends AppCompatActivity {
 
 
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        overridePendingTransition(R.anim.back_in, R.anim.back_out);
     }
 }
