@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 //import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -58,6 +59,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         TextView noteTextView;
         TextView listNameTextView;
         EditText noteEditText;
+        Button makeImportantButton;
         InputMethodManager imm;
 //        View itemView;
 
@@ -65,6 +67,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
             super(itemView);
 //            this.itemView = (TextView) itemView;
             listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
+            makeImportantButton = (Button) itemView.findViewById(R.id.note_makeimportant_button);
             setListNamesVisibility(listNameTextView);
             setNoteTextViewsVisibility(itemView);
             if (context instanceof EditNoteActivity) {
@@ -141,6 +144,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     selectedNotePosition = getAdapterPosition();
                     Log.i(LOG_TAG, "onFocusChange: selected item: position: " + selectedNotePosition + ", id in database: " + getNoteDbId(selectedNotePosition));
 
+                    makeImportantButton.setVisibility(View.VISIBLE);
 //                    imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);  //also works
 //                    if (height == 0) {
                         //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -157,6 +161,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     if (noteEditText.getText().toString().equals("")) {
                         noteEditText.setHint("");
                     }
+                    makeImportantButton.setVisibility(View.GONE);
                 }
 //                else {  //switching from current item to next
 //                    String text = ((EditText) v).getText().toString();
@@ -213,6 +218,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
         listNameTextView = noteViewHolder.listNameTextView;
         setListNamesVisibility(listNameTextView);
+        setPriotityButtonsVisibility(noteViewHolder, i);
 
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
@@ -446,6 +452,20 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         } else {
             noteEditText.setVisibility(View.GONE);
             noteTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+
+    public void setPriotityButtonsVisibility(final NoteViewHolder noteViewHolder, final int i) {
+        Button makeImportantButton = noteViewHolder.makeImportantButton;
+        if (context instanceof EditNoteActivity) {
+            if (selectedNotePosition == i) {
+                makeImportantButton.setVisibility(View.VISIBLE);
+            } else {
+                makeImportantButton.setVisibility(View.GONE);
+            }
+        } else {
+            makeImportantButton.setVisibility(View.GONE);
         }
     }
 
