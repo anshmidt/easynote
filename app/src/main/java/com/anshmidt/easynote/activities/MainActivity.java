@@ -35,8 +35,10 @@ public class MainActivity extends BaseActivity
     public void onCreate(Bundle savedInstanceState) {
         forceUsingOverflowMenu();
         setContentView(R.layout.activity_main);
+
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(this);
+
 
 
         //temp

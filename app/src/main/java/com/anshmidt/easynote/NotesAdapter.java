@@ -4,11 +4,11 @@ package com.anshmidt.easynote;
  * Created by Ilya Anshmidt on 02.09.2017.
  */
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,8 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 //import android.widget.EditText;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.anshmidt.easynote.activities.BaseActivity;
@@ -27,6 +27,7 @@ import com.anshmidt.easynote.activities.EditNoteActivity;
 import com.anshmidt.easynote.activities.MainActivity;
 import com.anshmidt.easynote.activities.TrashActivity;
 import com.anshmidt.easynote.database.DatabaseHelper;
+import com.anshmidt.easynote.dialogs.BottomSheetFragment;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,20 +60,34 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         TextView noteTextView;
         TextView listNameTextView;
         EditText noteEditText;
-        Button makeImportantButton;
+        ImageButton moreButton;
         InputMethodManager imm;
+
 //        View itemView;
 
         NoteViewHolder(View itemView) {
             super(itemView);
 //            this.itemView = (TextView) itemView;
             listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
-            makeImportantButton = (Button) itemView.findViewById(R.id.note_makeimportant_button);
+            moreButton = (ImageButton) itemView.findViewById(R.id.note_more_button);
             setListNamesVisibility(listNameTextView);
             setNoteTextViewsVisibility(itemView);
+
+
+
             if (context instanceof EditNoteActivity) {
                 imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                 noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
+
+                moreButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        KeyboardHelper keyboardHelper = new KeyboardHelper(context);
+                        keyboardHelper.hideKeyboard((EditText) noteEditText.findViewById(R.id.note_edittext));
+                        displayMainBottomSheet(selectedNotePosition);
+                    }
+                });
+
                 noteEditText.setOnFocusChangeListener(this);
                 noteEditText.addTextChangedListener(new TextWatcher() {
                     @Override
@@ -144,7 +159,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     selectedNotePosition = getAdapterPosition();
                     Log.i(LOG_TAG, "onFocusChange: selected item: position: " + selectedNotePosition + ", id in database: " + getNoteDbId(selectedNotePosition));
 
-                    makeImportantButton.setVisibility(View.VISIBLE);
+                    moreButton.setVisibility(View.VISIBLE);
 //                    imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);  //also works
 //                    if (height == 0) {
                         //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
@@ -161,7 +176,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     if (noteEditText.getText().toString().equals("")) {
                         noteEditText.setHint("");
                     }
-                    makeImportantButton.setVisibility(View.GONE);
+                    moreButton.setVisibility(View.GONE);
                 }
 //                else {  //switching from current item to next
 //                    String text = ((EditText) v).getText().toString();
@@ -173,7 +188,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         @Override
         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
             if (context instanceof MainActivity) {
-                displayMainContextMenu(v, longPressedNotePosition, menu);
+//                displayMainContextMenu(v, longPressedNotePosition, menu);
+                displayMainBottomSheet(longPressedNotePosition);
             }
             if (context instanceof TrashActivity) {
                 displayTrashContextMenu(v, longPressedNotePosition, menu);
@@ -218,7 +234,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
 
         listNameTextView = noteViewHolder.listNameTextView;
         setListNamesVisibility(listNameTextView);
-        setPriotityButtonsVisibility(noteViewHolder, i);
+        setPriorityButtonsVisibility(noteViewHolder, i);
 
         Priority notePriority = notesList.get(i).priority;
         noteDecorator.displayPriority(noteView, notePriority);
@@ -363,9 +379,19 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         return getNoteText(selectedNotePosition);
     }
 
-    private void displayMainContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
-        //menu.setHeaderTitle("Select The Action");
+    private void displayMainBottomSheet(int longPressedNotePosition) {
+        Note longPressedNote = getNote(longPressedNotePosition);
+        Log.d(LOG_TAG, "Long pressed note before changing: ");
+        longPressedNote.printContentToLog();
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+        Bundle selectedNoteBundle = new Bundle();
+        selectedNoteBundle.putInt(bottomSheetFragment.KEY_SELECTED_NOTE_ID, longPressedNote.id);
+        bottomSheetFragment.setArguments(selectedNoteBundle);
+        FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+        bottomSheetFragment.show(fragmentManager, bottomSheetFragment.FRAGMENT_TAG);
+    }
 
+    private void displayMainContextMenu(View itemView, int longPressedNotePosition, ContextMenu menu) {
         String titlePrefix = context.getString(R.string.note_context_menu_change_priority_title) + " ";
         String titleSetImportantPriority = titlePrefix + priorityInfo.IMPORTANT.name.toLowerCase();
         String titleSetNormalPriority = titlePrefix + priorityInfo.NORMAL.name.toLowerCase();
@@ -427,14 +453,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     public void setListNamesVisibility(TextView listNameTextView) {
         if (context instanceof TrashActivity) {
             listNameTextView.setVisibility(View.VISIBLE);
+
         } else {
-//            SearchView searchView = ((BaseActivity) context).searchView;
             SearchController searchController = ((BaseActivity) context).searchController;
             if (listNameTextView == null) {
                 Log.d(LOG_TAG, "listNameTextView == null");
                 return;
             }
-//            if (searchView == null || searchView.isIconified()) {
             if (searchController == null || searchController.isSearchViewNull() || searchController.isSearchViewIconified()) {
                 listNameTextView.setVisibility(View.GONE);
             } else {
@@ -442,6 +467,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
             }
         }
     }
+
+
 
     public void setNoteTextViewsVisibility(View itemView) {
         EditText noteEditText = (EditText) itemView.findViewById(R.id.note_edittext);
@@ -456,16 +483,16 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     }
 
 
-    public void setPriotityButtonsVisibility(final NoteViewHolder noteViewHolder, final int i) {
-        Button makeImportantButton = noteViewHolder.makeImportantButton;
+    public void setPriorityButtonsVisibility(final NoteViewHolder noteViewHolder, final int i) {
+        ImageButton changePriorityButton = noteViewHolder.moreButton;
         if (context instanceof EditNoteActivity) {
             if (selectedNotePosition == i) {
-                makeImportantButton.setVisibility(View.VISIBLE);
+                changePriorityButton.setVisibility(View.VISIBLE);
             } else {
-                makeImportantButton.setVisibility(View.GONE);
+                changePriorityButton.setVisibility(View.GONE);
             }
         } else {
-            makeImportantButton.setVisibility(View.GONE);
+            changePriorityButton.setVisibility(View.GONE);
         }
     }
 

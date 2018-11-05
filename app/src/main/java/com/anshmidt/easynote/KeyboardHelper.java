@@ -36,6 +36,15 @@ public class KeyboardHelper {
         });
     }
 
+    public void showKeyboard() {
+        InputMethodManager imm = (InputMethodManager)  (context.getSystemService(Context.INPUT_METHOD_SERVICE));
+        try {
+            imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+        } catch (NullPointerException e) {
+            Log.d(LOG_TAG, e.toString());
+        }
+    }
+
     public void hideKeyboard(EditText editText) {
         imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
     }
@@ -44,27 +53,4 @@ public class KeyboardHelper {
         editText.setSelection(editText.getText().length());
     }
 
-    public void showIfNotOpened(final View contentView, final EditText editText) {
-        final double KEYBOARD_TO_SCREEN_HEIGHT_RATIO = 0.15;
-
-        contentView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Rect rect = new Rect();
-                contentView.getWindowVisibleDisplayFrame(rect);
-                int screenHeight = contentView.getRootView().getHeight();
-
-                // r.bottom is the position above soft keypad or device button.
-                // if keypad is shown, the r.bottom is smaller than that before.
-                int keypadHeight = screenHeight - rect.bottom;
-
-                if (keypadHeight > screenHeight * KEYBOARD_TO_SCREEN_HEIGHT_RATIO) {
-                    Log.d(LOG_TAG, "Keyboard is opened");
-                } else {
-                    showKeyboard(editText);
-                    Log.d(LOG_TAG, "Keyboard is not opened");
-                }
-            }
-        });
-    }
 }

@@ -13,7 +13,6 @@ public class PriorityInfo {
     public Priority IMPORTANT;
     public Priority NORMAL;
     public Priority MINOR;
-    public Priority TRASH;
 
     public Priority DEFAULT;
 
@@ -23,7 +22,6 @@ public class PriorityInfo {
         IMPORTANT = new Priority(1, context.getString(R.string.note_priority_important));
         NORMAL = new Priority(2, context.getString(R.string.note_priority_normal));
         MINOR = new Priority(3, context.getString(R.string.note_priority_minor));
-        TRASH = new Priority(4, context.getString(R.string.note_priority_trash));
         DEFAULT = NORMAL;
     }
 

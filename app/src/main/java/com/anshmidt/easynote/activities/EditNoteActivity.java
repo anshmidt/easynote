@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 
 import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.database.DatabaseHelper;
@@ -85,6 +86,15 @@ public class EditNoteActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         overridePendingTransition(0, 0);
+    }
+
+    public EditText getItemViewByPosition(int itemPosition) {
+        return (EditText) llm.findViewByPosition(itemPosition).findViewById(R.id.note_edittext);
+    }
+
+    public EditText getItemViewById(int itemId) {
+        int position = notesAdapter.getPositionById(itemId);
+        return getItemViewByPosition(position);
     }
 
 

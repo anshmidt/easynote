@@ -66,10 +66,6 @@ public class RenameListDialogFragment extends DialogFragment {
 
         renameListEditText.setText(currentListName);
         keyboardHelper.moveCursorToEnd(renameListEditText);
-//        if (getActivity() instanceof MainActivity) {
-//            keyboardHelper.showKeyboard(renameListEditText);
-//        }
-
 
 
         builder.setPositiveButton(R.string.rename_list_dialog_ok_button, new DialogInterface.OnClickListener() {
@@ -79,15 +75,17 @@ public class RenameListDialogFragment extends DialogFragment {
                 if (listNameValid) {
                     RenameListDialogListener activity = (RenameListDialogListener) getActivity();
 
+                    if (getActivity() instanceof MainActivity) {
+                        keyboardHelper.hideKeyboard(renameListEditText);
+                    }
+
                     if (mode == Mode.renaming) {
                         activity.onListRenamed(listName);
                     } else {
                         activity.onListAdded(listName);
                     }
 
-                    if (getActivity() instanceof MainActivity) {
-                        keyboardHelper.hideKeyboard(renameListEditText);
-                    }
+
                 }
 
             }

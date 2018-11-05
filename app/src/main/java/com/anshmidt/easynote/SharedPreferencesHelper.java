@@ -24,7 +24,7 @@ public class SharedPreferencesHelper {
     private final String LOG_TAG = SharedPreferencesHelper.class.getSimpleName();
 
     private String KEY_LAST_OPENED_LIST;
-    private final int DEFAULT_LAST_OPENED_LIST = 0;
+    private final int DEFAULT_LAST_OPENED_LIST = 1;
 
 
     public SharedPreferencesHelper(Context context) {

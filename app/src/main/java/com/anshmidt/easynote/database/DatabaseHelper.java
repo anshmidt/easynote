@@ -32,22 +32,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        this.db = this.getWritableDatabase();  //so db is opened only once
         this.context = context;
+        this.db = this.getWritableDatabase();  //so db is opened only once
+
         notesDao = new NotesDao(this.db);
         listsDao = new ListsDao(this.db);
         priorityDao = new PriorityDao(this.db);
     }
 
-    public static DatabaseHelper getInstance(Context context){
+    public static synchronized DatabaseHelper getInstance(Context context){
         if (databaseHelperInstance == null) {
-            synchronized (DatabaseHelper.class) {
-                if (databaseHelperInstance == null) {
-                    databaseHelperInstance = new DatabaseHelper(context);
-                }
-            }
+            databaseHelperInstance = new DatabaseHelper(context.getApplicationContext());
         }
         return databaseHelperInstance;
+//        if (databaseHelperInstance == null) {
+//            synchronized (DatabaseHelper.class) {
+//                if (databaseHelperInstance == null) {
+//                    databaseHelperInstance = new DatabaseHelper(context);
+//                }
+//            }
+//        }
+//        return databaseHelperInstance;
     }
 
     @Override
@@ -59,6 +64,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         notesDao.onCreate(db);
         listsDao.onCreate(db);
         priorityDao.onCreate(db);
+        fillDatabaseWithDefaultData(db);
     }
 
     @Override
@@ -72,7 +78,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         priorityDao.onUpgrade(db);
     }
 
-    public void fillDatabaseWithDefaultData() {
+    public void fillDatabaseWithDefaultData(SQLiteDatabase db) {
+        Log.d(LOG_TAG, "Filling DB with default data");
         notesDao.fillWithDefaultData(db, context);
         listsDao.fillWithDefaultData(db, context);
         priorityDao.fillWithDefaultData(db, context);

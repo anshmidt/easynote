@@ -2,8 +2,8 @@
 <resources>
     <color name="primary">#00acc1</color>
     <color name="primaryDark">#007c91</color>
-    <!--<color name="mainBackgroundColor">#ececec</color>-->
-    <color name="mainBackgroundColor">#f9f9f9</color>
+    <color name="mainBackgroundColor">#ececec</color>
+    <!--<color name="mainBackgroundColor">#f9f9f9</color>-->
     <color name="notesTextColor">#595959</color>
     <color name="listNameInNoteTextColor">#bbbbbb</color>
     <color name="noteBackground">#ffffff</color>

@@ -25,12 +25,16 @@
 
     <string name="delete_list_confirmation_dialog_text">Move list \'%1$s\' and all its notes to trash?</string>
 
+    <string name="bottom_sheet_priority_title">Priority</string>
+    <string name="bottom_sheet_move_title">Move</string>
+
     <string name="note_priority_important">Important</string>
     <string name="note_priority_normal">Normal</string>
     <string name="note_priority_minor">Minor</string>
     <string name="note_priority_trash">Trash</string>
 
     <string name="default_first_list_name">My notes</string>
+    <string name="default_first_note_name">My first note</string>
 
     <string name="activity_trash_title">Trash</string>
     <string name="note_moved_to_trash_toast">Note moved to Trash</string>

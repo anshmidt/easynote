@@ -26,6 +26,7 @@ import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.NotesFormatter;
 import com.anshmidt.easynote.SearchController;
+import com.anshmidt.easynote.dialogs.BottomSheetFragment;
 import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
 import com.anshmidt.easynote.list_names_spinner.ListNamesSpinnerController;
 import com.anshmidt.easynote.NotesList;
@@ -36,6 +37,7 @@ import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
@@ -451,4 +453,6 @@ public abstract class BaseActivity extends AppCompatActivity
         super.onPause();
         ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
     }
+
+
 }
