@@ -41,12 +41,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     private NoteDecorator noteDecorator;
     private PriorityInfo priorityInfo;
     public ArrayList<Note> notesList;
-//    public String searchRequest = "";
-//    private ArrayList<Note> searchResultsList = new ArrayList<>();  //for search results
     private int selectedNotePosition = -1;
     public int longPressedNotePosition = -1;
     private final String LOG_TAG = NotesAdapter.class.getSimpleName();
-//    private boolean justCreated = true;
 
 
     public final int MAIN_CONTEXT_MENU_ITEM_MAKE_IMPORTANT_ID = 1;
@@ -63,11 +60,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         ImageButton moreButton;
         InputMethodManager imm;
 
-//        View itemView;
-
         NoteViewHolder(View itemView) {
             super(itemView);
-//            this.itemView = (TextView) itemView;
             listNameTextView = (TextView) itemView.findViewById(R.id.note_listname_textview);
             moreButton = (ImageButton) itemView.findViewById(R.id.note_more_button);
             setListNamesVisibility(listNameTextView);
@@ -151,8 +145,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         public void onFocusChange(View v, boolean hasFocus) {
             if (context instanceof EditNoteActivity) {
                 EditText noteEditText = (EditText) v;
-                //imm.showSoftInput(noteEditText, InputMethodManager.SHOW_FORCED);
-                //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
                 if (hasFocus) {
                     int height = noteEditText.getHeight();
                     Log.d(LOG_TAG, "height: " + height);
@@ -160,11 +152,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     Log.i(LOG_TAG, "onFocusChange: selected item: position: " + selectedNotePosition + ", id in database: " + getNoteDbId(selectedNotePosition));
 
                     moreButton.setVisibility(View.VISIBLE);
-//                    imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT);  //also works
-//                    if (height == 0) {
-                        //imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
-//                    }
-
 
                     if (noteEditText.getText().toString().equals("")) {
                         noteEditText.setHint(context.getString(R.string.new_note_hint));
@@ -178,10 +165,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                     }
                     moreButton.setVisibility(View.GONE);
                 }
-//                else {  //switching from current item to next
-//                    String text = ((EditText) v).getText().toString();
-//                    notesList.get(selectedNotePosition).setText(text);
-//                }
             }
         }
 
@@ -201,7 +184,6 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     public NotesAdapter(ArrayList<Note> notesList, Context context){
         this.notesList = notesList;
         this.context = context;
-//        this.searchResultsList.addAll(notesList);
         databaseHelper = DatabaseHelper.getInstance(this.context);
         noteDecorator = new NoteDecorator(context);
         priorityInfo = new PriorityInfo(context);
@@ -210,12 +192,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
     @Override
     public NoteViewHolder onCreateViewHolder(ViewGroup viewGroup, int i)  {
         View view;
-        if (context instanceof EditNoteActivity){
-//            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.editable_note, viewGroup, false);
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
-        } else {
-            view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
-        }
+        view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.note, viewGroup, false);
         return new NoteViewHolder(view);
     }
 
@@ -245,20 +222,10 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
                 EditText noteEditText = (EditText) noteView;
                 noteEditText.setSelection(noteEditText.getText().length()); //move cursor_searchview to the end of the note
 
-                //new
-//                InputMethodManager imm = (InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.showSoftInput(noteEditText, InputMethodManager.SHOW_FORCED);
             }
         }
 
-//        //temp
-//        if (i == 0) {
-//            if (context instanceof EditNoteActivity) {
-//                EditText noteEditText = (EditText) noteView;
-//                noteEditText.requestFocus();
-//            }
-//        }
-//        //end of temp
+
 
         if (noteViewHolder.listNameTextView != null) {
             noteViewHolder.listNameTextView.setText(notesList.get(i).list.name);
@@ -375,6 +342,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         return notesList.get(position).text;
     }
 
+    public Note getNoteById(int noteId) {
+        for (Note note : notesList) {
+            if (noteId == note.id) {
+                return note;
+            }
+        }
+        return null;
+    }
+
     public String getSelectedItemText() {
         return getNoteText(selectedNotePosition);
     }
@@ -386,6 +362,8 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
         BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
         Bundle selectedNoteBundle = new Bundle();
         selectedNoteBundle.putInt(bottomSheetFragment.KEY_SELECTED_NOTE_ID, longPressedNote.id);
+        selectedNoteBundle.putInt(bottomSheetFragment.KEY_SELECTED_NOTE_POSITION, longPressedNotePosition);
+        selectedNoteBundle.putString(bottomSheetFragment.KEY_SELECTED_NOTE_PRIORITY_NAME, longPressedNote.priority.name);
         bottomSheetFragment.setArguments(selectedNoteBundle);
         FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
         bottomSheetFragment.show(fragmentManager, bottomSheetFragment.FRAGMENT_TAG);
@@ -439,15 +417,19 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NoteViewHold
             public int compare(Note note1, Note note2) {
                 Integer priorityId1 = note1.priority.id;
                 Integer priorityId2 = note2.priority.id;
-                if ( !(priorityId1.equals(priorityId2))) {
-                    return priorityId1.compareTo(priorityId2);
-                }
-
                 Long modTime1 = note1.modificationTime;
                 Long modTime2 = note2.modificationTime;
 
-                return modTime2.compareTo(modTime1);
-            }});
+                if (context instanceof TrashActivity) {
+                    return modTime2.compareTo(modTime1);
+                } else {
+                    if ( !(priorityId1.equals(priorityId2))) {
+                        return priorityId1.compareTo(priorityId2);
+                    }
+                    return modTime2.compareTo(modTime1);
+                }
+            }
+        });
     }
 
     public void setListNamesVisibility(TextView listNameTextView) {

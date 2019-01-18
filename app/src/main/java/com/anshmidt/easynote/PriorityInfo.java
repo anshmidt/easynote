@@ -2,6 +2,8 @@ package com.anshmidt.easynote;
 
 import android.content.Context;
 
+import java.util.ArrayList;
+
 /**
  * Created by Ilya Anshmidt on 10.02.2018.
  */
@@ -16,6 +18,8 @@ public class PriorityInfo {
 
     public Priority DEFAULT;
 
+    private ArrayList<Priority> priorities = new ArrayList<>();
+
 
 
     public PriorityInfo(Context context) {
@@ -23,6 +27,19 @@ public class PriorityInfo {
         NORMAL = new Priority(2, context.getString(R.string.note_priority_normal));
         MINOR = new Priority(3, context.getString(R.string.note_priority_minor));
         DEFAULT = NORMAL;
+
+        priorities.add(IMPORTANT);
+        priorities.add(NORMAL);
+        priorities.add(MINOR);
+    }
+
+    public int getIdByName(String name) {
+        for (Priority priority : priorities) {
+            if (priority.name.equals(name)) {
+                return priority.id;
+            }
+        }
+        return 0;
     }
 
 

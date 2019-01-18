@@ -7,5 +7,5 @@
     android:textStyle="bold"
     android:gravity="left"
     android:textColor="@color/menuIcons"
-
+    android:drawableRight="@drawable/ic_spinner_arrow_drop_down"
     />

@@ -19,6 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
         android:popupBackground="@android:drawable/dialog_holo_light_frame"
+        android:background="@null"
         />
 
 

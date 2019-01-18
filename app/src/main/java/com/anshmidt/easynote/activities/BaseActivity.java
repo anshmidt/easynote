@@ -25,9 +25,12 @@ import android.widget.Toast;
 import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.NotesAdapter;
 import com.anshmidt.easynote.NotesFormatter;
+import com.anshmidt.easynote.Priority;
+import com.anshmidt.easynote.PriorityInfo;
 import com.anshmidt.easynote.SearchController;
 import com.anshmidt.easynote.dialogs.BottomSheetFragment;
 import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
+import com.anshmidt.easynote.dialogs.MoveNoteDialogFragment;
 import com.anshmidt.easynote.list_names_spinner.ListNamesSpinnerController;
 import com.anshmidt.easynote.NotesList;
 import com.anshmidt.easynote.dialogs.RenameListDialogFragment;
@@ -47,7 +50,9 @@ public abstract class BaseActivity extends AppCompatActivity
         implements RenameListDialogFragment.RenameListDialogListener,
         ListNamesSpinnerController.ListSelectedListener,
         ConfirmationDialogFragment.ConfirmationDialogListener,
-        SearchController.OnSearchViewExpandListener
+        SearchController.OnSearchViewExpandListener,
+        BottomSheetFragment.BottomSheetListener,
+        MoveNoteDialogFragment.MoveNoteDialogListener
 {
 
     private final String LOG_TAG = BaseActivity.class.getSimpleName();
@@ -84,6 +89,7 @@ public abstract class BaseActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar_main);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_done); //custom up button
 
         listNamesSpinner = (Spinner) findViewById(R.id.list_spinner);
 
@@ -101,6 +107,8 @@ public abstract class BaseActivity extends AppCompatActivity
         });
 
         rv = (RecyclerView)findViewById(R.id.recyclerView);
+
+        llm = new LinearLayoutManager(this);
 
 
         rv.addOnScrollListener(new RecyclerView.OnScrollListener(){
@@ -454,5 +462,30 @@ public abstract class BaseActivity extends AppCompatActivity
         ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
     }
 
+    @Override
+    public void onPriorityChanged(int selectedNoteId, Priority newPriority) {
+        Note selectedNote = notesAdapter.getNoteById(selectedNoteId);
+        selectedNote.priority = newPriority;
+        databaseHelper.updateNote(selectedNote);
+        notesAdapter.sortNotes(notesAdapter.notesList);
+        notesAdapter.notifyDataSetChanged();
 
+        int newPosition = notesAdapter.getPosition(selectedNote);
+        llm.scrollToPosition(newPosition);
+
+    }
+
+    @Override
+    public void onDestinationListChosen(int chosenListId, String chosenListName, int noteId) {
+
+        int position = notesAdapter.getPositionById(noteId);
+        Note movedNote = notesAdapter.getNote(position);
+        notesAdapter.remove(position);
+
+        String noteMovedToastText = getString(R.string.note_moved_toast, chosenListName);
+        Toast.makeText(BaseActivity.this, noteMovedToastText, Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "Note '"+movedNote.text+"' moved to list '"+chosenListName+"', listId = '"+chosenListId+"'");
+
+        databaseHelper.moveNoteToAnotherList(movedNote, new NotesList(chosenListId));
+    }
 }

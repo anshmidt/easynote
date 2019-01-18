@@ -21,6 +21,11 @@ public class Priority {
         this.id = id;
     }
 
+    public Priority(String name, Context context) {
+        this.name = name;
+        this.id = new PriorityInfo(context).getIdByName(name);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if ( !(obj instanceof Priority)) {

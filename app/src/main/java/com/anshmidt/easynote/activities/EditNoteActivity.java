@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.anshmidt.easynote.EasyNoteApplication;
+import com.anshmidt.easynote.Priority;
 import com.anshmidt.easynote.database.DatabaseHelper;
 import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.NotesAdapter;
@@ -78,9 +79,14 @@ public class EditNoteActivity extends BaseActivity {
         notesAdapter.setSelectedNotePosition(positionInList);
         //llm.scrollToPositionWithOffset(positionInList, 0);   //also works, but a bit different
         llm.scrollToPosition(positionInList);
-
     }
 
+    @Override
+    public void onPriorityChanged(int selectedNoteId, Priority newPriority) {
+        super.onPriorityChanged(selectedNoteId, newPriority);
+        int position = notesAdapter.getPositionById(selectedNoteId);
+        notesAdapter.setSelectedNotePosition(position);
+    }
 
     @Override
     protected void onPause() {

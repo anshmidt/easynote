@@ -19,8 +19,7 @@ import com.anshmidt.easynote.dialogs.MoveNoteDialogFragment;
 
 import java.util.ArrayList;
 
-public class MainActivity extends BaseActivity
-        implements MoveNoteDialogFragment.MoveNoteDialogListener {
+public class MainActivity extends BaseActivity {
 
     protected ArrayList<Note> notesList;
     protected RecyclerView rv;
@@ -101,19 +100,7 @@ public class MainActivity extends BaseActivity
         return super.onContextItemSelected(item);
     }
 
-    @Override
-    public void onDestinationListChosen(int chosenListId, String chosenListName, int noteId) {
 
-        int position = notesAdapter.getPositionById(noteId);
-        Note movedNote = notesAdapter.getNote(position);
-        notesAdapter.remove(position);
-
-        String noteMovedToastText = getString(R.string.note_moved_toast, chosenListName);
-        Toast.makeText(MainActivity.this, noteMovedToastText, Toast.LENGTH_SHORT).show();
-        Log.d(LOG_TAG, "Note '"+movedNote.text+"' moved to list '"+chosenListName+"', listId = '"+chosenListId+"'");
-
-        databaseHelper.moveNoteToAnotherList(movedNote, new NotesList(chosenListId));
-    }
 
 
 }
