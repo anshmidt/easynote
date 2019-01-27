@@ -9,11 +9,7 @@
         app:showAsAction="collapseActionView|always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:layout_width="wrap_content" />
-    <!--<item android:id="@+id/action_add"-->
-        <!--android:title="@string/menu_add_title"-->
-        <!--android:orderInCategory="2"-->
-        <!--android:icon="@drawable/ic_action_add"-->
-        <!--app:showAsAction="always" />-->
+
     <item
         android:id="@+id/action_rename_list"
         android:orderInCategory="100"

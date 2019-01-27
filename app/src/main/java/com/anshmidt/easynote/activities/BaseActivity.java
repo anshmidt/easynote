@@ -444,23 +444,23 @@ public abstract class BaseActivity extends AppCompatActivity
         notesAdapter.setSelectedNotePosition(newNotePosition);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        EasyNoteApplication application = (EasyNoteApplication) this.getApplication();
-        if (application.wasInBackground) {
-            Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-        }
-        application.stopActivityTransitionTimer();
-    }
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+//        EasyNoteApplication application = (EasyNoteApplication) this.getApplication();
+//        if (application.wasInBackground) {
+//            Intent intent = new Intent(this, MainActivity.class);
+//            startActivity(intent);
+//        }
+//        application.stopActivityTransitionTimer();
+//    }
 
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
+//    }
 
     @Override
     public void onPriorityChanged(int selectedNoteId, Priority newPriority) {

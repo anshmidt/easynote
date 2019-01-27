@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="5dp"
     android:layout_marginRight="5dp"
-    android:layout_marginTop="2dp"
-    android:layout_marginBottom="2dp"
+    android:layout_marginTop="@dimen/note_vertical_margin"
+    android:layout_marginBottom="@dimen/note_vertical_margin"
     style="@style/NoteCardViewStyle">
 
 
@@ -25,10 +25,10 @@
             android:layout_height="wrap_content"
             android:paddingTop="10dp"
             android:paddingBottom="0dp"
-            android:paddingLeft="5dp"
+            android:paddingLeft="@dimen/text_in_note_horizontal_padding"
             android:paddingRight="10dp"
             android:textColor="@color/listNameInNoteTextColor"
-            android:textSize="14sp"
+            android:textSize="@dimen/list_name_in_note_text_size"
 
             android:background="@color/noteBackground"
             android:layout_alignParentTop="true"
@@ -48,7 +48,6 @@
             android:padding="4dp"
             android:scaleType="fitXY"
             android:src="@drawable/ic_more_horizontal">
-
         </ImageButton>
 
         <TextView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -56,12 +55,12 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:paddingTop="@dimen/text_in_note_vertical_padding"
+            android:paddingBottom="@dimen/text_in_note_vertical_padding"
+            android:paddingLeft="@dimen/text_in_note_horizontal_padding"
+            android:paddingRight="@dimen/text_in_note_horizontal_padding"
             android:textColor="@color/notesTextColor"
-            android:textSize="20sp"
+            android:textSize="@dimen/main_text_size"
             android:background="@color/noteBackground"
             android:textCursorDrawable="@null"
             android:layout_below="@+id/note_more_button"
@@ -74,12 +73,12 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:paddingTop="@dimen/text_in_note_vertical_padding"
+            android:paddingBottom="@dimen/text_in_note_vertical_padding"
+            android:paddingLeft="@dimen/text_in_note_horizontal_padding"
+            android:paddingRight="@dimen/text_in_note_horizontal_padding"
             android:textColor="@color/notesTextColor"
-            android:textSize="20sp"
+            android:textSize="@dimen/main_text_size"
             android:background="@color/noteBackground"
             android:textCursorDrawable="@drawable/cursor_editablenote"
             android:textIsSelectable="true"

@@ -37,7 +37,7 @@
 
             android:text="@string/bottom_sheet_priority_title"
             android:textColor="@color/notesTextColor"
-            android:textSize="20sp" />
+            android:textSize="@dimen/main_text_size" />
 
         <com.anshmidt.oneline_list_entry_selector.OneLineListEntrySelector
             android:id="@+id/bottom_sheet_priority_selector"
@@ -46,29 +46,11 @@
             android:layout_weight="0.5"
             android:gravity="end"
 
-            app:textSize="20sp"
+            app:textSize="@dimen/main_text_size"
             app:textColor="@color/notesTextColor"
             >
         </com.anshmidt.oneline_list_entry_selector.OneLineListEntrySelector>
 
-        <!--<TextView-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="0.5"-->
-            <!--android:text="111111111"-->
-            <!--android:textSize="20sp"-->
-            <!--android:background="@color/notesDividerColor"-->
-            <!--/>-->
-
-        <!--<TextView-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_weight="0.5"-->
-            <!--android:gravity="end"-->
-            <!--android:text="324792834"-->
-            <!--android:textSize="20sp"-->
-            <!--android:background="@color/primary"-->
-            <!--/>-->
 
 
     </LinearLayout>
@@ -86,7 +68,7 @@
         android:gravity="start|center_vertical"
         android:text="@string/bottom_sheet_move_title"
         android:textColor="@color/notesTextColor"
-        android:textSize="20sp" />
+        android:textSize="@dimen/main_text_size" />
 
 
 
