@@ -20,7 +20,6 @@ public class Note {
     public long modificationTime;  //ms
     public boolean inTrash = false;
 
-    //public final int DEFAULT_PRIORITY_ID = 2;  //NORMAL
     private final String LOG_TAG = Note.class.getSimpleName();
 
     public Note(int id, long modificationTime, String text, boolean inTrash, Priority priority, NotesList list) {  // for getAllNotes in DbHelper

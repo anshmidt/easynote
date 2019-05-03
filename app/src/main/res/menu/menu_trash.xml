@@ -10,11 +10,26 @@
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:layout_width="wrap_content" />
 
+
+
     <item
-        android:id="@+id/action_empty_trash"
-        android:orderInCategory="100"
-        android:title="@string/menu_trash_delete_all_title"
-        app:showAsAction="never"/>
+        android:id="@+id/action_more"
+        android:title=""
+        android:icon="@drawable/ic_more_vert"
+        app:showAsAction="always">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_empty_trash"
+                android:icon="@drawable/ic_empty_trash"
+                android:orderInCategory="100"
+                android:title="@string/menu_trash_delete_all_title"
+                app:showAsAction="never"/>
+
+        </menu>
+
+    </item>
 
 
 </menu>

@@ -7,11 +7,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
@@ -22,11 +20,9 @@ import android.view.ViewConfiguration;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.anshmidt.easynote.EasyNoteApplication;
 import com.anshmidt.easynote.NotesAdapter;
-import com.anshmidt.easynote.NotesFormatter;
+import com.anshmidt.easynote.NotesConverter;
 import com.anshmidt.easynote.Priority;
-import com.anshmidt.easynote.PriorityInfo;
 import com.anshmidt.easynote.SearchController;
 import com.anshmidt.easynote.dialogs.BottomSheetFragment;
 import com.anshmidt.easynote.dialogs.ConfirmationDialogFragment;
@@ -40,7 +36,10 @@ import com.anshmidt.easynote.Note;
 import com.anshmidt.easynote.R;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
+
+import static android.content.ClipDescription.MIMETYPE_TEXT_PLAIN;
 
 /**
  * Created by Ilya Anshmidt on 04.09.2017.
@@ -314,15 +313,39 @@ public abstract class BaseActivity extends AppCompatActivity
                 break;
             }
             case R.id.action_copy_list_to_clipboard: {
-                NotesFormatter notesFormatter = new NotesFormatter(BaseActivity.this);
-                String textToCopy = notesFormatter.notesOfOneListToString(notesAdapter.notesList);
+                NotesConverter notesConverter = new NotesConverter();
+                String textToCopy = notesConverter.notesOfOneListToString(notesAdapter.notesList);
 
                 ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                 ClipData clip = ClipData.newPlainText(null, textToCopy);
                 clipboard.setPrimaryClip(clip);
 
                 String toastMessage = getString(R.string.list_copied_to_clipboard_toast, listNamesSpinnerController.getCurrentList().name);
-                Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_LONG).show();
+                Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case R.id.action_add_notes_from_clipboard: {
+                ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                String clipboardData = "";
+
+                if (!(clipboard.hasPrimaryClip())) {
+                    // No data in clipboard
+                    String toastMessage = getString(R.string.no_data_add_from_clipboard_toast);
+                    Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+                } else if (!(clipboard.getPrimaryClipDescription().hasMimeType(MIMETYPE_TEXT_PLAIN))) {
+                    // clipboard has data but it is not plain text
+                    String toastMessage = getString(R.string.not_plain_text_add_from_clipboard_toast);
+                    Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+                } else {
+                    // clipboard data is in plain text
+                    ClipData.Item clipboardItem = clipboard.getPrimaryClip().getItemAt(0);
+                    clipboardData = clipboardItem.getText().toString();
+                    if (clipboardData != null) {
+                        importNotesFromString(clipboardData);
+                        String toastMessage = getString(R.string.imported_from_clipboard_toast);
+                        Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+                    }
+                }
                 break;
             }
 //            case R.id.action_recreate_db: {  //for debug purposes only
@@ -359,10 +382,6 @@ public abstract class BaseActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-
-//    public void setSearchRequest(String request) {
-//        this.searchRequest = request;
-//    }
 
     protected NotesAdapter getNotesAdapter() {
         return notesAdapter;
@@ -439,7 +458,7 @@ public abstract class BaseActivity extends AppCompatActivity
         newNote.id = databaseHelper.addNote(newNote);
 
         notesAdapter.add(newNotePosition, newNote);
-        rv = (RecyclerView)findViewById(R.id.recyclerView);
+        rv = (RecyclerView) findViewById(R.id.recyclerView);
         rv.getLayoutManager().scrollToPosition(newNotePosition);
         notesAdapter.setSelectedNotePosition(newNotePosition);
     }
@@ -487,5 +506,18 @@ public abstract class BaseActivity extends AppCompatActivity
         Log.d(LOG_TAG, "Note '"+movedNote.text+"' moved to list '"+chosenListName+"', listId = '"+chosenListId+"'");
 
         databaseHelper.moveNoteToAnotherList(movedNote, new NotesList(chosenListId));
+    }
+
+    public void importNotesFromString(String string) {
+        NotesList currentList = listNamesSpinnerController.getCurrentList();
+        NotesConverter notesConverter = new NotesConverter();
+        List<String> notesTextsList = notesConverter.stringToList(string);
+        for (String noteText : notesTextsList) {
+            int newNotePosition = getNotesAdapter().whereToAddNewNote();
+            Note note = new Note(noteText, BaseActivity.this);
+            note.list = currentList;
+            note.id = databaseHelper.addNote(note);
+            notesAdapter.add(newNotePosition, note);
+        }
     }
 }

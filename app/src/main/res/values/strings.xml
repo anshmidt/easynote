@@ -9,12 +9,13 @@
     <string name="menu_restore_db">Restore DB</string>
     <string name="menu_perform_sql_request">Perform SQL request</string>
     <string name="menu_copy_list_to_clipboard">Copy list to clipboard</string>
+    <string name="menu_add_notes_from_clipboard">Add notes from clipboard</string>
     <string name="note_context_menu_change_priority_title">Make</string>
     <string name="note_context_menu_move">Move</string>
     <string name="new_note_hint">Enter note text...</string>
     <string name="add_new_list_label">Add new list</string>
 
-    <string name="list_copied_to_clipboard_toast">Notes from list \'%1$s\' with normal and important priority copied to clipboard</string>
+    <string name="list_copied_to_clipboard_toast">Notes from list \'%1$s\' copied to clipboard</string>
 
     <string name="rename_list_dialog_title">Enter list name:</string>
     <string name="rename_list_dialog_ok_button">OK</string>
@@ -43,5 +44,8 @@
 
     <string name="shar_pref_key_last_opened_list">last_opened_list</string>
 
+    <string name="no_data_add_from_clipboard_toast">No data in clipboard</string>
+    <string name="not_plain_text_add_from_clipboard_toast">Data in clipboard is not plain text</string>
+    <string name="imported_from_clipboard_toast">Notes from clipboard added to this list</string>
 
 </resources>
