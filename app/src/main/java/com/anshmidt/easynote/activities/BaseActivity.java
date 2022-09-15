@@ -497,8 +497,9 @@ public abstract class BaseActivity extends AppCompatActivity
     public void importNotesFromString(String string) {
         NotesList currentList = listNamesSpinnerController.getCurrentList();
         NotesConverter notesConverter = new NotesConverter();
-        List<String> notesTextsList = notesConverter.stringToList(string);
-        for (int i = 0; i < notesTextsList.size(); i++) {
+        List<String> notesTextsList = notesConverter.stringToListUsingOnlyEasynoteDelimiters(string); //TODO temp, remove to stringToList()
+//        List<String> notesTextsList = notesConverter.stringToList(string);
+        for (int i = notesTextsList.size() - 1; i >= 0; i--) {
             String noteText = notesTextsList.get(i);
             int newNotePosition = getNotesAdapter().whereToAddNewNote();
             Note note = new Note(noteText, BaseActivity.this);

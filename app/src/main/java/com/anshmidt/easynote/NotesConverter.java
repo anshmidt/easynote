@@ -38,15 +38,31 @@ public class NotesConverter {
         return stringBuilder.toString();
     }
 
-    public List<Note> stringToListOfNotes(String textWithDelimiters, Context context, NotesList notesList) {
-        List<String> listOfStrings = stringToList(textWithDelimiters);
-        List<Note> listOfNotes = new ArrayList<>();
-        for (String noteText : listOfStrings) {
-            Note note = new Note(noteText, context);
-            note.list = notesList;
-            listOfNotes.add(note);
+//    public List<Note> stringToListOfNotes(String textWithDelimiters, Context context, NotesList notesList) {
+//        List<String> listOfStrings = stringToList(textWithDelimiters);
+//        List<Note> listOfNotes = new ArrayList<>();
+//        for (String noteText : listOfStrings) {
+//            Note note = new Note(noteText, context);
+//            note.list = notesList;
+//            listOfNotes.add(note);
+//        }
+//        return listOfNotes;
+//    }
+
+    public List<String> stringToListUsingOnlyEasynoteDelimiters(String textWithDelimiters) {
+        //possible delimiters:
+        // 1)
+
+        if ( (textWithDelimiters.contains("1)")) && (textWithDelimiters.contains("2)"))) {
+            //delimiters type "7)"
+            String regex = "\\d{1,2}\\)";
+            List<String> lines = Arrays.asList(textWithDelimiters.split(regex));
+            return refineLines(lines);
+        } else {
+            ArrayList<String> oneItemArray = new ArrayList<>();
+            oneItemArray.add(textWithDelimiters);
+            return oneItemArray;
         }
-        return listOfNotes;
     }
 
     public List<String> stringToList(String textWithDelimiters) {
@@ -62,7 +78,7 @@ public class NotesConverter {
             //delimiters type "7)"
             textWithDelimiters = textWithDelimiters.replace("\n", "");
             textWithDelimiters = textWithDelimiters.replace(",", "");
-            String regex = "\\d\\)";
+            String regex = "\\d{1,2}\\)";
             List<String> lines = Arrays.asList(textWithDelimiters.split(regex));
             return refineLines(lines);
         }
@@ -114,7 +130,8 @@ public class NotesConverter {
     private List<String> refineLines(List<String> lines) { //remove not needed spaces, etc.
         ArrayList<String> refinedLines = new ArrayList<>();
 
-        for (String line : lines) {
+        for (int i = 0; i < lines.size(); i++) {
+            String line = lines.get(i);
             String refinedLine = line.trim();
             if (refinedLine.length() > 0) {
                 refinedLines.add(refinedLine);

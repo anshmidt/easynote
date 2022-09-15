@@ -54,6 +54,12 @@ public class ImportListTest {
         printListOfNoteText(notesConverter.stringToList(textFromClipboard));
     }
 
+    @Test
+    public void importLongList() {
+        String textFromClipboard = "1) Large\n 2) Middle\n 3)Small 21) Different 22) All";
+        printListOfNoteText(notesConverter.stringToList(textFromClipboard));
+    }
+
 
 
     public static void printListOfNoteText(List<String> listOfNoteText) {
