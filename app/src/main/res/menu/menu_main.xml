@@ -37,15 +37,22 @@
                 android:title="@string/menu_copy_list_to_clipboard"
                 app:showAsAction="never"/>
             <item
+                android:id="@+id/action_copy_all_lists_to_clipboard"
+                android:icon="@drawable/ic_copy_all_to_clipboard"
+                android:orderInCategory="103"
+                android:title="@string/menu_copy_all_lists_to_clipboard"
+                app:showAsAction="never"
+                />
+            <item
                 android:id="@+id/action_add_notes_from_clipboard"
                 android:icon="@drawable/ic_add_notes_from_clipboard"
-                android:orderInCategory="103"
+                android:orderInCategory="104"
                 android:title="@string/menu_add_notes_from_clipboard"
                 app:showAsAction="never"/>
             <item
                 android:id="@+id/action_open_trash"
                 android:icon="@drawable/ic_open_trash"
-                android:orderInCategory="104"
+                android:orderInCategory="105"
                 android:title="@string/menu_open_trash_title"
                 app:showAsAction="never"/>
             <!--<item-->

@@ -45,14 +45,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             databaseHelperInstance = new DatabaseHelper(context.getApplicationContext());
         }
         return databaseHelperInstance;
-//        if (databaseHelperInstance == null) {
-//            synchronized (DatabaseHelper.class) {
-//                if (databaseHelperInstance == null) {
-//                    databaseHelperInstance = new DatabaseHelper(context);
-//                }
-//            }
-//        }
-//        return databaseHelperInstance;
     }
 
     @Override
@@ -97,13 +89,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d(LOG_TAG, "getPriorityIdByName(\"Important\") = " + priorityDao.getPriorityIdByName("Important"));
     }
 
-//    public ArrayList<Note> getAllNotes() {
-//        return notesDao.getAllNotes();
-//    }
-
-    public ArrayList<Note> getAllNotesFromList(NotesList list) {
-        return notesDao.getAllNotesFromList(list);
+    public ArrayList<Note> getAllNotesFromList(Integer listId) {
+        return notesDao.getAllNotesFromList(listId);
     }
+
 
     public ArrayList<Note> getAllNotesFromTrash() {
         return notesDao.getAllNotesFromTrash();
@@ -138,7 +127,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void moveAllNotesFromListToTrash(NotesList list) {
-        ArrayList<Note> allNotesFromList = getAllNotesFromList(list);
+        ArrayList<Note> allNotesFromList = getAllNotesFromList(list.id);
         for (int i = 0; i<allNotesFromList.size(); i++) {
             moveNoteToTrash(allNotesFromList.get(i));
         }
@@ -168,7 +157,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return listsDao.getAllListNamesNotFromTrash();
     }
 
-
+    public List<Integer> getAllListIds() {
+        return listsDao.getAllListIdsNotFromTrash();
+    }
 
     public String getListNameById(int listId) {
         return listsDao.getListById(listId).name;

@@ -48,7 +48,7 @@ public class EditNoteActivity extends BaseActivity {
         llm = new LinearLayoutManager(this);
         rv.setLayoutManager(llm);
 
-        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList());
+        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList().id);
         notesAdapter = new NotesAdapter(notesList, this);
         setNotesAdapter(notesAdapter);
         rv.setAdapter(notesAdapter);

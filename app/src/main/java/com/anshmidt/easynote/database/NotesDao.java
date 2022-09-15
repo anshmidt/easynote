@@ -191,7 +191,7 @@ public class NotesDao implements TableHelper {
         return notesList;
     }
 
-    public ArrayList<Note> getAllNotesFromList(NotesList fromThisList) {
+    public ArrayList<Note> getAllNotesFromList(Integer listId) {
         String selectAllNotesQuery = "SELECT "
                 + KEY_NOTE_ID + ", "
                 + KEY_MODIFIED_AT + ", "
@@ -206,7 +206,7 @@ public class NotesDao implements TableHelper {
                 + " ON " + NOTES_TABLE_NAME + "." + KEY_LIST_ID + " = " + ListsDao.LISTS_TABLE_NAME + "." + KEY_LIST_ID
                 + " LEFT OUTER JOIN " + PriorityDao.PRIORITY_TABLE_NAME
                 + " ON " + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " = " + PriorityDao.PRIORITY_TABLE_NAME + "." + KEY_PRIORITY_ID
-                + " WHERE " + ListsDao.LISTS_TABLE_NAME + "." + ListsDao.KEY_LIST_ID + " = " + fromThisList.id
+                + " WHERE " + ListsDao.LISTS_TABLE_NAME + "." + ListsDao.KEY_LIST_ID + " = " + listId
                 + " AND " + NOTES_TABLE_NAME + "." + KEY_IN_TRASH + " = " + IN_TRASH_FALSE
                 + " ORDER BY "
                 + NOTES_TABLE_NAME + "." + KEY_PRIORITY_ID + " ASC, "

@@ -218,7 +218,7 @@ public abstract class BaseActivity extends AppCompatActivity
     @Override
     public void onListSelected() {
         NotesList currentList = listNamesSpinnerController.getCurrentList();
-        notesAdapter.notesList = databaseHelper.getAllNotesFromList(currentList);
+        notesAdapter.notesList = databaseHelper.getAllNotesFromList(currentList.id);
         notesAdapter.notifyDataSetChanged();
         if (!addNoteButton.isShown()) {
             addNoteButton.show();
@@ -322,6 +322,10 @@ public abstract class BaseActivity extends AppCompatActivity
 
                 String toastMessage = getString(R.string.list_copied_to_clipboard_toast, listNamesSpinnerController.getCurrentList().name);
                 Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case R.id.action_copy_all_lists_to_clipboard: {
+                copyAllListsToClipboard();
                 break;
             }
             case R.id.action_add_notes_from_clipboard: {
@@ -463,24 +467,6 @@ public abstract class BaseActivity extends AppCompatActivity
         notesAdapter.setSelectedNotePosition(newNotePosition);
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//        EasyNoteApplication application = (EasyNoteApplication) this.getApplication();
-//        if (application.wasInBackground) {
-//            Intent intent = new Intent(this, MainActivity.class);
-//            startActivity(intent);
-//        }
-//        application.stopActivityTransitionTimer();
-//    }
-
-
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        ((EasyNoteApplication) this.getApplication()).startActivityTransitionTimer();
-//    }
-
     @Override
     public void onPriorityChanged(int selectedNoteId, Priority newPriority) {
         Note selectedNote = notesAdapter.getNoteById(selectedNoteId);
@@ -512,12 +498,32 @@ public abstract class BaseActivity extends AppCompatActivity
         NotesList currentList = listNamesSpinnerController.getCurrentList();
         NotesConverter notesConverter = new NotesConverter();
         List<String> notesTextsList = notesConverter.stringToList(string);
-        for (String noteText : notesTextsList) {
+        for (int i = 0; i < notesTextsList.size(); i++) {
+            String noteText = notesTextsList.get(i);
             int newNotePosition = getNotesAdapter().whereToAddNewNote();
             Note note = new Note(noteText, BaseActivity.this);
             note.list = currentList;
             note.id = databaseHelper.addNote(note);
             notesAdapter.add(newNotePosition, note);
         }
+    }
+
+    private void copyAllListsToClipboard() {
+        NotesConverter notesConverter = new NotesConverter();
+        List<Integer> allListIds = databaseHelper.getAllListIds();
+        List<String> contentList = new ArrayList<>();
+        for (Integer listId : allListIds) {
+            ArrayList<Note> notesFromList = databaseHelper.getAllNotesFromList(listId);
+            String listNotesAsString = notesConverter.notesOfOneListToString(notesFromList);
+            contentList.add(listNotesAsString);
+        }
+        String textToCopy = notesConverter.allListsContentToString(contentList);
+
+        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText(null, textToCopy);
+        clipboard.setPrimaryClip(clip);
+
+        String toastMessage = getString(R.string.all_lists_copied_to_clipboard_toast);
+        Toast.makeText(BaseActivity.this, toastMessage, Toast.LENGTH_SHORT).show();
     }
 }

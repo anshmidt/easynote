@@ -47,7 +47,7 @@ public class MainActivity extends BaseActivity {
 
 
         databaseHelper.deleteAllEmptyNotes();
-        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList());
+        notesList = databaseHelper.getAllNotesFromList(listNamesSpinnerController.getCurrentList().id);
 
         rv = (RecyclerView)findViewById(R.id.recyclerView);
         llm = new LinearLayoutManager(this);

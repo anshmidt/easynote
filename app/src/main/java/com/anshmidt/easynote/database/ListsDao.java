@@ -133,6 +133,22 @@ public class ListsDao implements TableHelper {
         return listNamesList;
     }
 
+    public List<Integer> getAllListIdsNotFromTrash() {
+        ArrayList<Integer> listIds = new ArrayList<>();
+        String selectAllListIdsQuery = "SELECT " + KEY_LIST_ID + " FROM " + LISTS_TABLE_NAME + " WHERE " + KEY_IN_TRASH + " = " + IN_TRASH_FALSE;
+
+        Cursor cursor = db.rawQuery(selectAllListIdsQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                Integer listId = cursor.getInt(0);
+                listIds.add(listId);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        return listIds;
+    }
+
 
 
     public void updateList(NotesList list) {

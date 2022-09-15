@@ -29,6 +29,15 @@ public class NotesConverter {
         return resultStringBuilder.toString();
     }
 
+    public String allListsContentToString(List<String> contentList) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < contentList.size(); i++) {
+            stringBuilder.append(contentList.get(i));
+            stringBuilder.append("\n");
+        }
+        return stringBuilder.toString();
+    }
+
     public List<Note> stringToListOfNotes(String textWithDelimiters, Context context, NotesList notesList) {
         List<String> listOfStrings = stringToList(textWithDelimiters);
         List<Note> listOfNotes = new ArrayList<>();
